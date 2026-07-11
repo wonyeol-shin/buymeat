@@ -15,5 +15,39 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private OrderStatus status;
 
+    @Column(nullable = false)
+    private int quantity;
+
+    @Column(nullable = false, unique = true, length = 50)
+    private String orderNumber;
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "admin_id")
+//    private Admin admin;
+
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "product_id", nullable = false)
+//    private Product product;
+
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "customer_id", nullable = false)
+//    private Customer customer;
+
+    @Column(nullable = false)
+    private long totalPrice;
+
+    public Order(int quantity, String orderNumber, long totalPrice) {
+        this.status = OrderStatus.PREPARING;
+        this.quantity = quantity;
+        this.orderNumber = orderNumber;
+        this.totalPrice = totalPrice;
+    }
+
+    public void updateStatus(OrderStatus status) {
+        this.status = status;
+    }
 }
