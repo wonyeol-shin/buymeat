@@ -1,5 +1,6 @@
 package com.example.ecommercesystemproject.admin.entity;
 
+import com.example.ecommercesystemproject.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -17,15 +18,20 @@ public class Admin extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(length = 30, nullable = false)
     private String name;
+
     @Column(length = 50 , nullable = false ,unique = true)
     private String email;
+
     @Setter
     @Column(length = 255, nullable = false)
     private String password;
+
     @Column(length = 25,nullable = false ,unique = true)
     private String phone;
+
     // [role 종류 ]
     // SUPER : 최상위 관리자
     // OP     : 운영 관리자
@@ -34,6 +40,7 @@ public class Admin extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(length = 10, nullable = false)
     private Role role;
+
     // [status 종류]
     // ACTIVE : 활성
     // STANDBY : 승인대기(기본값)
@@ -42,14 +49,16 @@ public class Admin extends BaseEntity {
     // REJECT : 승인 거부
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
-    // 기본값 승인 대기
     private Status status = Status.STANDBY;
+
     @Column(length = 255, nullable = false)
     private String whyAdminReason;
+
     @Column(length = 255)
     private String rejectReason;
 
     private LocalDateTime approvedAt;
+
     private LocalDateTime rejectedAt;
 
     // 회원가입

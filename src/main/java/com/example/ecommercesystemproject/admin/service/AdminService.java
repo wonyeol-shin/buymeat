@@ -98,6 +98,5 @@ public class AdminService {
         admin.updatePassword(request.getNewPassword());
     }
 
-    @Transactional
 
 }

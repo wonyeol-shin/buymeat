@@ -14,11 +14,13 @@ import java.util.List;
 public class AdminController {
     private final AdminService adminService;
 
+    // 다건 조회
     @GetMapping("/api/admins")
     public ResponseEntity<List<GetAllAdminResponse>> getAll() {
         return ResponseEntity.status(HttpStatus.OK).body(adminService.getAllAdmin());
     }
 
+    // 단건조회
     @GetMapping("/api/admins/{adminId}")
     public ResponseEntity<GetOneAdminResponse> getOne(
             @PathVariable Long adminId
@@ -26,6 +28,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK).body(adminService.getOneAdmin(adminId));
     }
 
+    // SUPER Role 계정만 가능, 원하는 관리자 정보 수정
     @PatchMapping("/api/admins/{adminId}")
     public ResponseEntity<Void> updateOne(
             @RequestBody UpdateAdminRequest request,
@@ -34,6 +37,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    // SUPER Role 계정만 가능, 관리자 상태 변경
     @PatchMapping("/api/admins/{adminId}/status")
     public ResponseEntity<Void> updateStatus(
             @PathVariable Long adminId,
@@ -43,6 +47,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    // 관리자 역할 변경
     @PatchMapping("/api/admins/{adminId}/role")
     public ResponseEntity<Void> updateRole(
             @PathVariable Long adminId,
@@ -52,6 +57,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    // 패스워드 변경
     @PatchMapping("/api/admins/password")
     public ResponseEntity<Void> updateMyPassword(
             @RequestBody UpdateMyPasswordRequest request
@@ -62,6 +68,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    // 프로필 정보 변경
     @PatchMapping("/api/admins/profile")
     public ResponseEntity<Void> updateMyProfile(
             @RequestBody UpdateAdminRequest request
