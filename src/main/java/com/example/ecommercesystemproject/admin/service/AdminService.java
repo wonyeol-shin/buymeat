@@ -91,9 +91,14 @@ public class AdminService {
                 () -> new IllegalStateException("없는 유저")
         );
 
+        if (!request.getNewPassword().equals(request.getCheckPassword())){
+            throw new IllegalStateException("변경 할 패스워드와 검증 패스워드가 다릅니다.");
+        }
+
         if (!admin.getPassword().equals(request.getOldPassword())){
             throw new IllegalStateException("패스워드 틀림");
         }
+
 
         admin.updatePassword(request.getNewPassword());
     }

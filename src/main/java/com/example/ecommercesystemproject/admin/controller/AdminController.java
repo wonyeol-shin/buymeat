@@ -2,6 +2,7 @@ package com.example.ecommercesystemproject.admin.controller;
 
 import com.example.ecommercesystemproject.admin.dto.*;
 import com.example.ecommercesystemproject.admin.service.AdminService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ public class AdminController {
     // SUPER Role 계정만 가능, 원하는 관리자 정보 수정
     @PatchMapping("/api/admins/{adminId}")
     public ResponseEntity<Void> updateOne(
-            @RequestBody UpdateAdminRequest request,
+            @Valid @RequestBody UpdateAdminRequest request,
             @PathVariable Long adminId) {
         adminService.updateAdminInfo(request, adminId);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -41,7 +42,7 @@ public class AdminController {
     @PatchMapping("/api/admins/{adminId}/status")
     public ResponseEntity<Void> updateStatus(
             @PathVariable Long adminId,
-            @RequestBody UpdateAdminStatusRequest request
+            @Valid @RequestBody UpdateAdminStatusRequest request
     ) {
         adminService.updateAdminStatus(adminId, request);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -51,7 +52,7 @@ public class AdminController {
     @PatchMapping("/api/admins/{adminId}/role")
     public ResponseEntity<Void> updateRole(
             @PathVariable Long adminId,
-            @RequestBody UpdateAdminRoleRequest request
+            @Valid @RequestBody UpdateAdminRoleRequest request
     ) {
         adminService.updateAdminRole(adminId, request);
         return ResponseEntity.status(HttpStatus.OK).build();
@@ -60,7 +61,7 @@ public class AdminController {
     // 패스워드 변경
     @PatchMapping("/api/admins/password")
     public ResponseEntity<Void> updateMyPassword(
-            @RequestBody UpdateMyPasswordRequest request
+            @Valid @RequestBody UpdateMyPasswordRequest request
     ) {
         // 추후 세션 ID 받아서 수정 필요
         Long id = 1L;
@@ -71,7 +72,7 @@ public class AdminController {
     // 프로필 정보 변경
     @PatchMapping("/api/admins/profile")
     public ResponseEntity<Void> updateMyProfile(
-            @RequestBody UpdateAdminRequest request
+            @Valid @RequestBody UpdateAdminRequest request
     ) {
         // 추후 세션 ID 받아서 수정 필요
         Long id = 1L;
