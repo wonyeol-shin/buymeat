@@ -29,6 +29,10 @@ public class Customer {
     @Enumerated(EnumType.STRING) // enum 문자로 저장
     @Column(nullable = false, length = 10)
     private CustomerStatus status;
+//    [stauts 종류]
+//    ACTIVE : 활성
+//    INACTIVE : 비활성
+//    SUSPENSION : 정지
 
 
     public Customer(String name, String email, String phone) {

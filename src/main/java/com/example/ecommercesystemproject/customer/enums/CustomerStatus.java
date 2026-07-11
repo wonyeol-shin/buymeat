@@ -8,5 +8,5 @@ public enum CustomerStatus {
     INACTIVE,
 
     // 정지
-    SUSPENDED
+    SUSPENSION
 }
