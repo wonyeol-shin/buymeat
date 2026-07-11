@@ -11,8 +11,13 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
     private final ProductService productService;
 
-    @PostMapping
-    public ResponseEntity<CreateProductResponse> createCustomer(@RequestBody CreateProductRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.create(request));
+    @PostMapping("/api/products")
+    public ResponseEntity<CreateProductResponse> create(@RequestBody CreateProductRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(request));
+    }
+
+    @GetMapping("/api/products/{productId}")
+    public ResponseEntity<GetProductResponse> getOne(@PathVariable Long productId) {
+        return ResponseEntity.ok(productService.getOneProduct(productId));
     }
 }
