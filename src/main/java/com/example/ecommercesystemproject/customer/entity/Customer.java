@@ -1,5 +1,6 @@
 package com.example.ecommercesystemproject.customer.entity;
 
+import com.example.ecommercesystemproject.common.BaseEntity;
 import com.example.ecommercesystemproject.customer.enums.CustomerStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "customers")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 // BaseEntity 추가될 예정
-public class Customer {
+public class Customer extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -13,14 +13,14 @@ public class CreateCustomerResponse {
     private final String email;
     private final String phone;
     private final CustomerStatus status;
-    // TODO: BASE ENTITIY 만들면 생성일 넣기
-//    private final LocalDateTime createdAt;
+    private final LocalDateTime createdAt;
 
-    public CreateCustomerResponse(Long id, String name, String email, String phone, CustomerStatus status) {
+    public CreateCustomerResponse(Long id, String name, String email, String phone, CustomerStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.status = status;
+        this.createdAt = createdAt;
     }
 }

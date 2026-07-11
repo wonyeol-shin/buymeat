@@ -1,8 +1,6 @@
 package com.example.ecommercesystemproject.customer.service;
 
-import com.example.ecommercesystemproject.customer.dto.CreateCustomerRequest;
-import com.example.ecommercesystemproject.customer.dto.CreateCustomerResponse;
-import com.example.ecommercesystemproject.customer.dto.GetCustomerResponse;
+import com.example.ecommercesystemproject.customer.dto.*;
 import com.example.ecommercesystemproject.customer.entity.Customer;
 import com.example.ecommercesystemproject.customer.enums.CustomerStatus;
 import com.example.ecommercesystemproject.customer.repository.CustomerRepository;
@@ -27,7 +25,7 @@ public class CustomerService {
         return new CreateCustomerResponse(
                 savedCustomer.getId(), savedCustomer.getName(),
                 savedCustomer.getEmail(), savedCustomer.getPhone(),
-                savedCustomer.getStatus()
+                savedCustomer.getStatus(), savedCustomer.getCreatedAt()
         );
     }
 
@@ -37,7 +35,19 @@ public class CustomerService {
         Customer customer = getOrThrow(customerId);
         return new GetCustomerResponse(
                 customer.getId(), customer.getName(), customer.getEmail(),
-                customer.getPhone(), customer.getStatus()
+                customer.getPhone(), customer.getStatus(),
+                customer.getCreatedAt(), customer.getModifiedAt()
+        );
+    }
+
+    // 고객 정보 수정
+    @Transactional
+    public UpdateCustomerResponse updateCustomer(Long customerId, UpdateCustomerRequest request) {
+        Customer customer = getOrThrow(customerId);
+        customer.updateCustomer(request.name, request.email, request.phone);
+        return new UpdateCustomerResponse(
+                customer.getId(), customer.getName(), customer.getEmail(),
+                customer.getPhone(), customer.getCreatedAt(), customer.getModifiedAt()
         );
     }
 

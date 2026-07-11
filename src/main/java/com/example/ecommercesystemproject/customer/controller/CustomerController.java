@@ -1,8 +1,6 @@
 package com.example.ecommercesystemproject.customer.controller;
 
-import com.example.ecommercesystemproject.customer.dto.CreateCustomerRequest;
-import com.example.ecommercesystemproject.customer.dto.CreateCustomerResponse;
-import com.example.ecommercesystemproject.customer.dto.GetCustomerResponse;
+import com.example.ecommercesystemproject.customer.dto.*;
 import com.example.ecommercesystemproject.customer.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,4 +32,14 @@ public class CustomerController {
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(customerService.getOneCustomer(customerId));
     }
+
+    // 고객 정보 수정
+    @PutMapping("/{customerId}")
+    public ResponseEntity<UpdateCustomerResponse> updateCustomer(
+            @PathVariable Long customerId,
+            @RequestBody UpdateCustomerRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(customerService.updateCustomer(customerId, request));
+    }
+
 }
