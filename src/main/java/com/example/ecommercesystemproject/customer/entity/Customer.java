@@ -1,16 +1,16 @@
 package com.example.ecommercesystemproject.customer.entity;
 
+import com.example.ecommercesystemproject.customer.enums.CustomerStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Entity
 @Table(name = "customers")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+// BaseEntity 추가될 예정
 public class Customer {
 
     @Id
@@ -20,21 +20,24 @@ public class Customer {
     @Column(nullable = false, length = 30)
     private String name;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 50, unique = true)
     private String email;
 
     @Column(nullable = false, length = 25)
     private String phone;
 
+    @Enumerated(EnumType.STRING) // enum 문자로 저장
     @Column(nullable = false, length = 10)
-    private String status;
+    private CustomerStatus status;
 
 
-    public Customer(String name, String email, String phone, String status) {
+    public Customer(String name, String email, String phone) {
         this.name = name;
         this.email =email;
         this.phone = phone;
-        this.status = status;
+
+        // 고객 생성시 기본 상태는 활성
+        this.status = CustomerStatus.ACTIVE;
     }
 
     // 고객 정보 수정
@@ -45,7 +48,7 @@ public class Customer {
     }
 
     // 고객 상태 변경
-    public void updateCustomerStatus(String status) {
+    public void updateCustomerStatus(CustomerStatus status) {
         this.status = status;
     }
 }
