@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public class UpdateCustomerRequest {
 
-    public String name;
-    public String email;
-    public String phone;
+    private String name;
+    private String email;
+    private String phone;
 }

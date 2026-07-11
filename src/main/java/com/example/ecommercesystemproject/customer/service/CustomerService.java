@@ -44,7 +44,7 @@ public class CustomerService {
     @Transactional
     public UpdateCustomerResponse updateCustomer(Long customerId, UpdateCustomerRequest request) {
         Customer customer = getOrThrow(customerId);
-        customer.updateCustomer(request.name, request.email, request.phone);
+        customer.updateCustomer(request.getName(), request.getEmail(), request.getPhone());
         return new UpdateCustomerResponse(
                 customer.getId(), customer.getName(), customer.getEmail(),
                 customer.getPhone(), customer.getCreatedAt(), customer.getModifiedAt()
