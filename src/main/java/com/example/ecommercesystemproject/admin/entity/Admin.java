@@ -107,4 +107,21 @@ public class Admin extends BaseEntity {
         this.password = password;
     }
 
+    // 테스트를 쉽게 하기 위해서 toSting 정의
+    @Override
+    public String toString() {
+        return "Admin{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", phone='" + phone + '\'' +
+                ", role=" + role +
+                ", status=" + status +
+                ", whyAdminReason='" + whyAdminReason + '\'' +
+                ", rejectReason='" + rejectReason + '\'' +
+                ", approvedAt=" + approvedAt +
+                ", rejectedAt=" + rejectedAt +
+                '}';
+    }
 }
