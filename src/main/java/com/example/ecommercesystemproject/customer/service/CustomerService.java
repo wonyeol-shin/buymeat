@@ -1,5 +1,6 @@
 package com.example.ecommercesystemproject.customer.service;
 
+import com.example.ecommercesystemproject.common.ServiceException;
 import com.example.ecommercesystemproject.customer.dto.*;
 import com.example.ecommercesystemproject.customer.entity.Customer;
 import com.example.ecommercesystemproject.customer.enums.CustomerStatus;
@@ -51,12 +52,19 @@ public class CustomerService {
         );
     }
 
+    @Transactional
+    public UpdateCustomerStatusResponse updateCustomerStatus(Long customerId, UpdateCustomerStatusRequest request) {
+        Customer customer = getOrThrow(customerId);
+        customer.updateCustomerStatus(request.getStatus());
+        return new UpdateCustomerStatusResponse(customer.getId(), customer.getStatus());
+    }
+
     // customer 내부 공통 메서드
     // customerId에 해당하는 고객이 없으면 예외 발생
     private Customer getOrThrow(Long customerId) {
         return customerRepository.findById(customerId).orElseThrow(
-                () -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "해당 고객을 찾을 수 없습니다. "
+                () -> new ServiceException(
+                        "해당 고객을 찾을 수 없습니다.", HttpStatus.NOT_FOUND
                 )
         );
     }

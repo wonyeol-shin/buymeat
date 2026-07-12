@@ -1,6 +1,7 @@
 package com.example.ecommercesystemproject.customer.controller;
 
 import com.example.ecommercesystemproject.customer.dto.*;
+import com.example.ecommercesystemproject.customer.enums.CustomerStatus;
 import com.example.ecommercesystemproject.customer.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,15 @@ public class CustomerController {
             @RequestBody UpdateCustomerRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(customerService.updateCustomer(customerId, request));
+    }
+
+    // 고객 상태 변경
+    @PatchMapping("/{customerId}/status")
+    public ResponseEntity<UpdateCustomerStatusResponse> updateCustomerStatus(
+            @PathVariable Long customerId,
+            @Valid @RequestBody UpdateCustomerStatusRequest request
+            ) {
+        return ResponseEntity.status(HttpStatus.OK).body(customerService.updateCustomerStatus(customerId, request));
     }
 
 }
