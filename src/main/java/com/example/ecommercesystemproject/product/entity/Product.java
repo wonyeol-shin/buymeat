@@ -1,6 +1,5 @@
 package com.example.ecommercesystemproject.product.entity;
 
-import com.example.ecommercesystemproject.admin.entity.Admin;
 import com.example.ecommercesystemproject.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,9 +28,9 @@ public class Product extends BaseEntity {
     @Column(nullable = false, length = 10)
     private String status;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(nullable = false)
-    private Admin admin_id;
+    //@ManyToOne(optional = false)
+    //@JoinColumn(nullable = false)
+    //private Admin admin_id;
 
     // 상품 등록
     public Product(String n, String c, Long p, Integer s, String a) {
