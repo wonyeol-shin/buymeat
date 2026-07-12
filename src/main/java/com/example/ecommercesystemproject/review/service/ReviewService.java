@@ -19,8 +19,8 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
 
-    public List<ListReviewResponse> getAllReview(Pageable pageable) {
-        return reviewRepository.findAllWithCustomerAndOrder(pageable).stream()
+    public List<ListReviewResponse> getAllReview(Pageable pageable, String keyword) {
+        return reviewRepository.findAllWithCustomerAndOrder(pageable, keyword).stream()
                 .map(ListReviewResponse::from)
                 .toList();
     }
