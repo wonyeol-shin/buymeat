@@ -1,9 +1,15 @@
 package com.example.ecommercesystemproject.order.controller;
 
+import com.example.ecommercesystemproject.common.constant.SessionConst;
 import com.example.ecommercesystemproject.order.dto.*;
 import com.example.ecommercesystemproject.order.service.OrderService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +24,20 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResponse> create(
-            @Valid @RequestBody CreateOrderRequest request
+            @Valid @RequestBody CreateOrderRequest request,
+            HttpSession session
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(request));
+        Long adminId = (Long) session.getAttribute(SessionConst.LOGIN_ADMIN_ID);
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(request, adminId));
     }
 
+    // 주문 전체 조회 + 검색, 페이징, 정렬
     @GetMapping
-    public ResponseEntity<List<OrderResponse>> getAll() {
-        return ResponseEntity.ok(orderService.getAllOrder());
+    public ResponseEntity<Page<OrderResponse>> getAll(
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            OrderSearchCondition condition
+    ) {
+        return ResponseEntity.ok(orderService.getAllOrder(pageable, condition));
     }
 
     @GetMapping("/{orderId}")
@@ -34,18 +46,22 @@ public class OrderController {
     }
 
     @PatchMapping("/{orderId}/status")
-    public ResponseEntity<OrderResponse> update(
+    public ResponseEntity<OrderResponse> updateStatus(
             @PathVariable Long orderId,
-            @Valid @RequestBody UpdateOrderRequest request
+            @Valid @RequestBody UpdateOrderRequest request,
+            HttpSession session
     ) {
-        return ResponseEntity.ok(orderService.updateOrder(orderId, request));
+        Long adminId = (Long) session.getAttribute(SessionConst.LOGIN_ADMIN_ID);
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, request, adminId));
     }
 
     @PatchMapping("/{orderId}/cancel")
     public ResponseEntity<OrderResponse> cancel(
             @PathVariable Long orderId,
-            @Valid @RequestBody DeleteOrderRequest request
+            @Valid @RequestBody CancelOrderRequest request,
+            HttpSession session
     ) {
-        return ResponseEntity.ok(orderService.cancelOrder(orderId, request));
+        Long adminId = (Long) session.getAttribute(SessionConst.LOGIN_ADMIN_ID);
+        return ResponseEntity.ok(orderService.cancelOrder(orderId, request, adminId));
     }
 }

@@ -1,6 +1,7 @@
 package com.example.ecommercesystemproject.common;
 
 import com.example.ecommercesystemproject.common.exception.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import com.example.ecommercesystemproject.common.response.ApiResponse;
 
 import java.util.List;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     // 주석 지우지 마세요
@@ -36,6 +38,19 @@ public class GlobalExceptionHandler {
             ServiceException ex
     ) {
         return ResponseEntity.status(ex.getStatus()).body(ex.getMessage());
+    }
+
+    // 서버 에러 관련 처리
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleException(Exception ex) {
+        log.error("서버 내부 오류가 발생했습니다.", ex);
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.of(
+                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        "서버 내부 오류가 발생했습니다."
+                ));
     }
 
     // Auth exception handler

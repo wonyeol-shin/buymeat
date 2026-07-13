@@ -2,6 +2,8 @@ package com.example.ecommercesystemproject.product.entity;
 
 import com.example.ecommercesystemproject.admin.entity.Admin;
 // import com.example.ecommercesystemproject.common.entity.BaseTimeEntity; // 생성일, 수정일 상속 클래스가 있다면 사용
+import com.example.ecommercesystemproject.common.BaseEntity;
+import com.example.ecommercesystemproject.common.exception.BadRequestException;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -61,4 +63,26 @@ public class Product {
     public void editStatus(ProductStatus status) {
         this.status = status;
     }
+}
+
+    // 재고 복구
+
+    public void restoreStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalStateException(
+                    "복구할 재고 수량은 1개 이상이어야 합니다."
+            );
+        }
+
+        this.stock += quantity;
+
+        // 단종 상품은 재고만 복구하고 상태 유지
+        if (this.status == ProductStatus.DISCONTINUED) {
+            return;
+        }
+
+        // 재고가 복구되면 판매 가능 상태로 전환
+        this.status = ProductStatus.ACTIVE;
+    }
+
 }

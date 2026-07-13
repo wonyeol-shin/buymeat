@@ -1,6 +1,9 @@
 package com.example.ecommercesystemproject.product.dto;
 
 import jakarta.validation.constraints.*;
+import com.example.ecommercesystemproject.product.entity.ProductStatus;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
@@ -19,6 +22,6 @@ public class CreateProductRequest {
     @PositiveOrZero(message = "유효하지 않은 재고 값")
     private Integer stock;
 
-    @NotNull(message = "상품 상태 입력 누락")
-    private String status;
+    @NotNull
+    private ProductStatus status;
 }
