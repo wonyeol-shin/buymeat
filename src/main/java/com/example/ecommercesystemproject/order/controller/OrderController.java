@@ -1,7 +1,9 @@
 package com.example.ecommercesystemproject.order.controller;
 
+import com.example.ecommercesystemproject.common.constant.SessionConst;
 import com.example.ecommercesystemproject.order.dto.*;
 import com.example.ecommercesystemproject.order.service.OrderService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,9 +20,11 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResponse> create(
-            @Valid @RequestBody CreateOrderRequest request
+            @Valid @RequestBody CreateOrderRequest request,
+            HttpSession session
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(request));
+        Long adminId = (Long) session.getAttribute(SessionConst.LOGIN_ADMIN_ID);
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(request,adminId));
     }
 
     @GetMapping

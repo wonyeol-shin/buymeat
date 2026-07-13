@@ -1,10 +1,16 @@
 package com.example.ecommercesystemproject.order.service;
 
+import com.example.ecommercesystemproject.admin.entity.Admin;
 import com.example.ecommercesystemproject.admin.entity.Role;
+import com.example.ecommercesystemproject.admin.repository.AdminRepository;
+import com.example.ecommercesystemproject.customer.entity.Customer;
+import com.example.ecommercesystemproject.customer.repository.CustomerRepository;
 import com.example.ecommercesystemproject.order.dto.*;
 import com.example.ecommercesystemproject.order.entity.Order;
 import com.example.ecommercesystemproject.order.repository.OrderRepository;
 import com.example.ecommercesystemproject.order.util.OrderNumberGenerator;
+import com.example.ecommercesystemproject.product.entity.Product;
+import com.example.ecommercesystemproject.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,19 +22,33 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class OrderService {
     private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final CustomerRepository customerRepository;
+    private final AdminRepository adminRepository;
 
     @Transactional
-    public OrderResponse create(CreateOrderRequest request) {
+    public OrderResponse create(CreateOrderRequest request, Long adminId) {
+        Product product = productRepository.findById(request.getProductId()).orElseThrow(
+                () -> new IllegalStateException("없는 상품입니다.")
+        );
+        Customer customer = customerRepository.findById(request.getCustomerId()).orElseThrow(
+                () -> new IllegalStateException("없는 고객입니다.")
+        );
+        Admin admin = adminRepository.findById(adminId).orElseThrow(
+                () -> new IllegalStateException("없는 관리자입니다.")
+        );
+        long totalPrice = product.getPrice() * request.getQuantity();
 
-        // long totalPrice = (long) product.getPrice() * request.getQuantity();
         Order order = new Order(
                 request.getQuantity(),
                 OrderNumberGenerator.generate(),
-                100 //임시값
-                );
+                admin,
+                product,
+                customer,
+                totalPrice
+        );
         Order savedOrder = orderRepository.save(order);
-
-        return toResponse(order);
+        return toResponse(savedOrder);
     }
 
     public List<OrderResponse> getAllOrder() {
@@ -62,22 +82,30 @@ public class OrderService {
     }
 
 
-    // 임시값 수정 해야함
     private OrderResponse toResponse(Order order) {
+        Product product = order.getProduct();
+        Customer customer = order.getCustomer();
+        Admin admin = order.getAdmin();
+
+        Long adminId = admin != null ? admin.getId() : null;
+        String adminName = admin != null ? admin.getName() : null;
+        String adminEmail = admin != null ? admin.getEmail() : null;
+        Role adminRole = admin != null ? admin.getRole() : null;
+
         return new OrderResponse(
                 order.getId(),
                 order.getOrderNumber(),
-                "customerName",
-                "productName",
+                customer.getName(),
+                product.getProduct_name(),
                 order.getQuantity(),
                 order.getCreatedAt().toLocalDate(),
                 order.getStatus(),
                 order.getTotalPrice(),
-                "customerEmail",
-                1L,
-                "adminName",
-                "adminEmail",
-                Role.OP,
+                customer.getEmail(),
+                adminId,
+                adminName,
+                adminEmail,
+                adminRole,
                 order.getCancellationReason()
         );
     }
