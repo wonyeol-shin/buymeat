@@ -5,6 +5,9 @@ import com.example.ecommercesystemproject.customer.enums.CustomerStatus;
 import com.example.ecommercesystemproject.customer.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +27,15 @@ public class CustomerController {
             @Valid @RequestBody CreateCustomerRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(customerService.createCustomer(request));
+    }
+
+    // 고객 전체 조회(+ 조건 검색)
+    @GetMapping
+    public ResponseEntity<Page<GetCustomerResponse>> getAll(
+            @PageableDefault(page = 0, size = 10) Pageable pageable,
+            CustomerSearchCondition condition
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(customerService.getAllCustomer(pageable, condition));
     }
 
     // 고객 단건 조회
