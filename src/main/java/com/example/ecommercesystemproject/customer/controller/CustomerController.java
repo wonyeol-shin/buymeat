@@ -52,4 +52,13 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.OK).body(customerService.updateCustomerStatus(customerId, request));
     }
 
+    // 고객 삭제
+    @DeleteMapping("/{customerId}")
+    public ResponseEntity<Void> deleteCustomer(
+            @PathVariable Long customerId
+    ) {
+        customerService.deleteCustomer(customerId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
 }

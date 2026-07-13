@@ -59,6 +59,12 @@ public class CustomerService {
         return new UpdateCustomerStatusResponse(customer.getId(), customer.getStatus());
     }
 
+    @Transactional
+    public void deleteCustomer(Long customerId) {
+        Customer customer = getOrThrow(customerId);
+        customerRepository.delete(customer);
+    }
+
     // customer 내부 공통 메서드
     // customerId에 해당하는 고객이 없으면 예외 발생
     private Customer getOrThrow(Long customerId) {
@@ -68,4 +74,7 @@ public class CustomerService {
                 )
         );
     }
+
+
+
 }
