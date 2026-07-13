@@ -72,7 +72,7 @@ public class AdminController {
             @Valid @RequestBody RejectAdminRequest request,
             @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
     ) {
-        adminService.rejectAdmin(adminId,request, adminSession.getId()) );
+        adminService.rejectAdmin(adminId,request, adminSession.getId());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
