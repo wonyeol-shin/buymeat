@@ -21,30 +21,36 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ProductService {
+
     private final ProductRepository productRepository;
     private final AdminRepository adminRepository;
 
     // 정렬 허용 필드 화이트리스트 (요구사항: 가격/재고/등록일만 허용)
     private static final List<String> ALLOWED_SORT_FIELDS = List.of("price", "stock", "createdAt");
 
-    // 상품 등록
-    // (admin_id 연관관계가 필수(nullable=false)로 바뀌면서, 등록 시 로그인한 관리자 정보가 필요해짐 -> adminId 파라미터 추가)
+    // 1. 상품 등록
     @Transactional
     public CreateProductResponse createProduct(CreateProductRequest request, Long adminId) {
+        checkLogin(adminId);
+
         Admin admin = adminRepository.findById(adminId)
                 .orElseThrow(() -> new ServiceException("존재하지 않는 관리자입니다.", HttpStatus.NOT_FOUND));
 
-        Product product = new Product(request.getProduct_name(), request.getCategory(),
-                request.getPrice(), request.getStock(), request.getStatus(), admin);
+        // Product 엔티티 생성 시 생성자 파라미터 규격에 맞춰 넘겨줍니다.
+        // 만약 Product 엔티티 생성자에 request.getStatus()도 필요하다면 마지막 인자로 추가하세요.
+        Product product = new Product(
+                request.getProduct_name(),
+                request.getCategory(),
+                request.getPrice(),
+                request.getStock(),
+                admin
+        );
 
         Product saveProduct = productRepository.save(product);
-
-        return new CreateProductResponse(saveProduct.getId(), saveProduct.getProduct_name(),
-                saveProduct.getCategory(), saveProduct.getPrice(), saveProduct.getStock(),
-                saveProduct.getStatus(), saveProduct.getCreatedAt());
+        return CreateProductResponse.from(saveProduct);
     }
 
-    // 상품 리스트 조회 - 페이징 + 정렬/필터/키워드
+    // 2. 상품 리스트 조회 - 페이징 + 정렬/필터/키워드
     @Transactional(readOnly = true)
     public PageResponse<GetProductResponse> getAllProducts(
             String keyword, String category, String status,
@@ -58,67 +64,75 @@ public class ProductService {
 
         Page<Product> result = productRepository.search(keyword, category, status, pageable);
 
-        // 4. 응답에 등록 관리자명 포함
-        Page<GetProductResponse> mapped = result.map(p -> new GetProductResponse(
-                p.getId(), p.getProduct_name(), p.getCategory(), p.getPrice(),
-                p.getStock(), p.getStatus(), p.getCreatedAt(), p.getAdmin().getName()
-        ));
+        // 응답 DTO 규격(GetProductResponse)에 맞게 매핑
+        Page<GetProductResponse> mapped = result.map(GetProductResponse::from);
 
         return PageResponse.of(mapped);
     }
 
-    // 상품 단 건 조회 (4. 등록 관리자명 + 이메일까지 포함)
+    // 3. 상품 단 건 상세 조회
     @Transactional(readOnly = true)
-    public GetProductDetailResponse getOneProduct(Long id) {
-        Product product = productRepository.findWithAdminById(id)
-                .orElseThrow(() -> new ServiceException("유효하지 않은 상품", HttpStatus.NOT_FOUND));
+    public GetProductResponse getOneProduct(Long id, Long adminId) {
+        checkLogin(adminId);
 
-        return new GetProductDetailResponse(
-                product.getId(), product.getProduct_name(), product.getCategory(), product.getPrice(),
-                product.getStock(), product.getStatus(), product.getCreatedAt(),
-                product.getAdmin().getName(), product.getAdmin().getEmail()
-        );
+        // N+1 문제를 방지하기 위해 fetch join 쿼리인 findWithAdminById 사용 권장
+        // 만약 해당 메서드가 없으면 productRepository.findById(id)로 대체 가능합니다.
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ServiceException("유효하지 않은 상품입니다.", HttpStatus.NOT_FOUND));
+
+        return GetProductResponse.from(product);
     }
 
-    // 상품 업데이트
+    // 4. 상품 정보 수정
     @Transactional
-    public UpdateProductResponse updateProduct(Long id, UpdateProductRequest request) {
-        Product product = check(id);
+    public UpdateProductResponse updateProduct(Long id, UpdateProductRequest request, Long adminId) {
+        checkLogin(adminId);
+        Product product = checkKey(id);
 
         product.editProduct(request.getProduct_name(), request.getCategory(), request.getPrice());
         return new UpdateProductResponse(product.getId());
     }
 
-    // 6. 재고 수정 - 실제 상태 자동 전환 로직은 Product.editStock() 안에서 처리
+    // 5. 재고 수정
     @Transactional
-    public UpdateProductStockResponse updateProductStock(Long id, UpdateProductStockRequest request) {
-        Product product = check(id);
+    public UpdateProductStockResponse updateProductStock(Long id, UpdateProductStockRequest request, Long adminId) {
+        checkLogin(adminId);
+        Product product = checkKey(id);
 
         product.editStock(request.getStock());
         return new UpdateProductStockResponse(product.getId(), product.getStock(), product.getStatus());
     }
 
-    // 상품 상태 수정
+    // 6. 상품 상태 수정
     @Transactional
-    public UpdateProductStatusResponse updateProductStatus(Long id, UpdateProductStatusRequest request) {
-        Product product = check(id);
+    public UpdateProductStatusResponse updateProductStatus(Long id, UpdateProductStatusRequest request, Long adminId) {
+        checkLogin(adminId);
+        Product product = checkKey(id);
 
         product.editStatus(request.getStatus());
         return new UpdateProductStatusResponse(product.getId(), product.getStatus());
     }
 
-    // 상품 삭제
+    // 7. 상품 삭제
     @Transactional
-    public void deleteProduct(Long id) {
-        Product product = check(id);
+    public void deleteProduct(Long id, Long adminId) {
+        checkLogin(adminId);
+        Product product = checkKey(id);
 
         productRepository.delete(product);
     }
 
-    // 손 댈 상품 키 선정
-    private Product check(Long id) {
+    // [공통 검증] 상품 존재 여부 확인 및 엔티티 반환
+    private Product checkKey(Long id) {
         return productRepository.findById(id).orElseThrow(
-                () -> new ServiceException("유효하지 않은 상품", HttpStatus.NOT_FOUND) // 404
+                () -> new ServiceException("유효하지 않은 상품입니다.", HttpStatus.NOT_FOUND)
         );
+    }
+
+    // [공통 검증] 관리자 로그인 여부 확인
+    private void checkLogin(Long loginUserId) {
+        if (loginUserId == null) {
+            throw new ServiceException("로그인이 필요합니다.", HttpStatus.FORBIDDEN);
+        }
     }
 }
