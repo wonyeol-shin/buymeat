@@ -46,7 +46,16 @@ public class Order extends BaseEntity {
 
     private String cancellationReason;
 
-    public Order(int quantity, String orderNumber, Admin admin, Product product, Customer customer, long totalPrice) {
+    public Order(int quantity,
+                 String orderNumber,
+                 Admin admin,
+                 Product product,
+                 Customer customer,
+                 long totalPrice
+    ) {
+        if (quantity < 1) {
+            throw new IllegalArgumentException("주문 수량은 1개 이상이어야 합니다.");
+        }
         this.status = OrderStatus.PREPARING;
         this.quantity = quantity;
         this.orderNumber = orderNumber;
