@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 @Getter
-public class DeleteOrderRequest {
+public class CancelOrderRequest {
     @NotBlank(message = "취소 사유를 입력해주세요.")
     private String cancellationReason;
 }
