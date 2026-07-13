@@ -2,10 +2,11 @@ package com.example.ecommercesystemproject.product.dto;
 
 import java.time.LocalDateTime;
 
-public record GetProductResponse(
+// 상세조회용 응답 DTO 신규 생성
+
+public record GetProductDetailResponse(
         Long id, String product_name, String category, Long price,
         Integer stock, String status, LocalDateTime createdAt,
-        // 목록용 응답 DTO
-        String adminName // 등록 관리자명 추가(새롭게 추가 된 변수)
+        String adminName, String adminEmail
 ) {
 }

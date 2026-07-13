@@ -1,5 +1,6 @@
 package com.example.ecommercesystemproject.product.entity;
 
+import com.example.ecommercesystemproject.admin.entity.Admin;
 import com.example.ecommercesystemproject.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,17 +29,20 @@ public class Product extends BaseEntity {
     @Column(nullable = false, length = 10)
     private String status;
 
-    //@ManyToOne(optional = false)
-    //@JoinColumn(nullable = false)
-    //private Admin admin_id;
+    // 주석 해제 + admin_id -> admin 으로 필드명 변경 (연관관계 필드는 객체를 그대로 가리키는게 컨벤션)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "admin_id", nullable = false)
+    private Admin admin;
 
-    // 상품 등록
-    public Product(String n, String c, Long p, Integer s, String a) {
+    // 상품 등록 (admin 파라미터 추가됨 - 등록 관리자 저장을 위해 필수)
+    // 변수명을... 한글자로 쓰는거.. 괜찮을까요....???
+    public Product(String n, String c, Long p, Integer s, String a, Admin admin) {
         this.product_name = n;
         this.category = c;
         this.price = p;
         this.stock = s;
         this.status = a;
+        this.admin = admin;
     }
 
     // 상품 업데이트
@@ -48,9 +52,18 @@ public class Product extends BaseEntity {
         this.price = p;
     }
 
-    // 재고 수정
-    public void editStock(Integer s) {
-        this.stock = s;
+    // 재고 수정 + 상태 자동 전환
+    // 재고 0 이하 -> SOLD_OUT
+    // 재고 1 이상 -> ON_SALE
+    // 현재 상태가 DISCONTINUED(단종)이면 재고 값만 바뀌고 상태는 유지
+    public void editStock(Integer newStock) {
+        this.stock = newStock;
+
+        if ("DISCONTINUED".equals(this.status)) { // // ENUM을 무엇으로 하는지 보고 수정 필요.
+            return;
+        }
+
+        this.status = (newStock <= 0) ? "SOLD_OUT" : "ON_SALE"; // ENUM을 무엇으로 하는지 보고 수정 필요.
     }
 
     // 상태 수정

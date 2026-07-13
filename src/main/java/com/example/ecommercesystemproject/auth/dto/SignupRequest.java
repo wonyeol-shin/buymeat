@@ -1,5 +1,6 @@
 package com.example.ecommercesystemproject.auth.dto;
 
+import com.example.ecommercesystemproject.admin.entity.Admin;
 import com.example.ecommercesystemproject.admin.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -30,6 +31,4 @@ public class SignupRequest {
 
     @NotBlank(message = "관리자 신청 사유는 필수 입력 항목입니다.")
     private String whyAdminReason;
-
-
 }
