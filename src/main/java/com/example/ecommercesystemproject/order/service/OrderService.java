@@ -93,6 +93,10 @@ public class OrderService {
 
         Order order = getOrderOrThrow(orderId);
         order.cancel(request.getCancellationReason());
+
+        Product product = order.getProduct();
+        product.restoreStock(order.getQuantity());
+
         return toResponse(order);
     }
 
