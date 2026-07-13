@@ -6,6 +6,8 @@ import com.example.ecommercesystemproject.admin.entity.AdminSpecification;
 import com.example.ecommercesystemproject.admin.entity.Role;
 import com.example.ecommercesystemproject.admin.entity.Status;
 import com.example.ecommercesystemproject.admin.repository.AdminRepository;
+import com.example.ecommercesystemproject.common.ServiceException;
+import jakarta.validation.Valid;
 import com.example.ecommercesystemproject.common.config.PasswordEncoder;
 import com.example.ecommercesystemproject.common.exception.AccountNotActiveException;
 import com.example.ecommercesystemproject.common.exception.DifferentPasswordException;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,7 +54,7 @@ public class AdminService {
     // 다건조회 + 쿼리 파라미터로 값을 받아서 정렬 and 필터 + ( 촤소한 관리자들만 이용 가능 )
     @Transactional(readOnly = true)
     public Page<GetAllAdminResponse> getAdminDynamic(
-            Pageable pageable,  String name, String email, Role role, Status status,  Long sessionAdminId
+            Pageable pageable, String name, String email, Role role, Status status, Long sessionAdminId
     ) {
         // 로그인 한 계정이 존재하지 않는 id 일경우 에러, 유효하면 Admin return
         Admin admin = findAdminExist(sessionAdminId);
@@ -119,6 +122,24 @@ public class AdminService {
         );
 
         findedAdmin.updateProfile(request.getName(), request.getEmail(), request.getPhone());
+    }
+
+    @Transactional
+    public void updateAdminAccountStatus(Long adminId, UpdateAdminStatusRequest updateAdminStatusRequest, Long sessionAdminId) {
+        Admin admin = findAdminExist(sessionAdminId);
+
+        if (admin.getStatus() != Status.ACTIVE && admin.getRole() != Role.SUPER)
+            throw new IllegalStateException("변경 할 권한 없음");
+
+        Admin findedAdmin = adminRepository.findById(adminId)
+                .orElseThrow(() -> new ServiceException("없는 유저", HttpStatus.NOT_FOUND));
+
+        if (findedAdmin.getStatus() != Status.STANDBY) {
+            throw new ServiceException("승인 대기 상태가 아닌 계정은 승인/거부할 수 없습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        findedAdmin.updateNormalStatus(updateAdminStatusRequest.getStatus());
+        adminRepository.save(findedAdmin);
     }
 
     // 관리자 상태 변경 (Root만 가능)
