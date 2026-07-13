@@ -65,8 +65,16 @@ public class Order extends BaseEntity {
         this.totalPrice = totalPrice;
     }
 
-    public void updateStatus(OrderStatus status) {
-        this.status = status;
+    public void updateStatus(OrderStatus newStatus) {
+        OrderStatus nextStatus = this.status.next();
+
+        if (nextStatus != newStatus) {
+            throw new IllegalStateException(
+                    "주문 상태는 준비중 → 배송중 → 배송완료 순서로만 변경할 수 있습니다."
+            );
+        }
+
+        this.status = newStatus;
     }
 
     public void cancel(String cancellationReason) {
