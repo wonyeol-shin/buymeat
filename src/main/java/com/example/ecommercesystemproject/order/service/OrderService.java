@@ -3,12 +3,15 @@ package com.example.ecommercesystemproject.order.service;
 import com.example.ecommercesystemproject.admin.entity.Role;
 import com.example.ecommercesystemproject.order.dto.CreateOrderRequest;
 import com.example.ecommercesystemproject.order.dto.CreateOrderResponse;
+import com.example.ecommercesystemproject.order.dto.GetOrderResponse;
 import com.example.ecommercesystemproject.order.entity.Order;
 import com.example.ecommercesystemproject.order.repository.OrderRepository;
 import com.example.ecommercesystemproject.order.util.OrderNumberGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -39,9 +42,53 @@ public class OrderService {
                 savedOrder.getTotalPrice(),
                 "customerEmail",
                 1L,
-                "aminName",
+                "adminName",
                 "adminEmail",
                 Role.OP
         );
     }
+
+    public List<GetOrderResponse> getAllOrder() {
+        return orderRepository.findAll()
+                .stream()
+                .map(order -> new GetOrderResponse(
+                        order.getId(),
+                        order.getOrderNumber(),
+                        "customerName",
+                        "productName",
+                        order.getQuantity(),
+                        order.getCreatedAt().toLocalDate(),
+                        order.getStatus(),
+                        order.getTotalPrice(),
+                        "customerEmail",
+                        1L,
+                        "adminName",
+                        "adminEmail",
+                        Role.OP
+                ))
+                .toList();
+    }
+
+    public GetOrderResponse getOneOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new IllegalStateException("없는 주문입니다.")
+        );
+        return new GetOrderResponse(
+                order.getId(),
+                order.getOrderNumber(),
+                "customerName",
+                "productName",
+                order.getQuantity(),
+                order.getCreatedAt().toLocalDate(),
+                order.getStatus(),
+                order.getTotalPrice(),
+                "customerEmail",
+                1L,
+                "adminName",
+                "adminEmail",
+                Role.OP
+        );
+    }
+
+
 }
