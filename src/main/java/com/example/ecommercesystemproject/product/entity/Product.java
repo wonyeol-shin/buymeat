@@ -26,8 +26,9 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     private Integer stock;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
-    private String status;
+    private ProductStatus status;
 
     // 주석 해제 + admin_id -> admin 으로 필드명 변경 (연관관계 필드는 객체를 그대로 가리키는게 컨벤션)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -37,12 +38,20 @@ public class Product extends BaseEntity {
     // 상품 등록 (admin 파라미터 추가됨 - 등록 관리자 저장을 위해 필수)
     // 변수명을... 한글자로 쓰는거.. 괜찮을까요....???
     public Product(String n, String c, Long p, Integer s, String a, Admin admin) {
+    @ManyToOne(optional = false)
+    @JoinColumn(nullable = false)
+    private Admin admin_id;
+
+    // 상품 등록
+    public Product(String n, String c, Long p, Integer s, Admin a) {
         this.product_name = n;
         this.category = c;
         this.price = p;
         this.stock = s;
         this.status = a;
         this.admin = admin;
+        this.admin_id = a;
+        this.status = ProductStatus.ON_SALE; // 기본값 설정
     }
 
     // 상품 업데이트
@@ -67,8 +76,8 @@ public class Product extends BaseEntity {
     }
 
     // 상태 수정
-    public void editStatus(String a) {
-        this.status = a;
+    public void editStatus(ProductStatus s) {
+        this.status = s;
     }
 }
 // 브랜치 rebase 후 다시 푸쉬

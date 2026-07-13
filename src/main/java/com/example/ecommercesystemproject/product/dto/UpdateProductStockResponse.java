@@ -1,4 +1,6 @@
 package com.example.ecommercesystemproject.product.dto;
 
-public record UpdateProductStockResponse(Long id, Integer stock, String status) {
+import com.example.ecommercesystemproject.product.entity.ProductStatus;
+
+public record UpdateProductStockResponse(Long id, Integer stock, ProductStatus status) {
 }

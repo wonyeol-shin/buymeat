@@ -36,12 +36,14 @@ public class ProductService {
 
         Product product = new Product(request.getProduct_name(), request.getCategory(),
                 request.getPrice(), request.getStock(), request.getStatus(), admin);
+                .orElseThrow(() -> new ServiceException("유효하지 않은 관리자", HttpStatus.NOT_FOUND));
+        checkLogin(adminId);
+
+        Product product = new Product(request.getProduct_name(), request.getCategory(),
+                request.getPrice(), request.getStock(), admin);
 
         Product saveProduct = productRepository.save(product);
-
-        return new CreateProductResponse(saveProduct.getId(), saveProduct.getProduct_name(),
-                saveProduct.getCategory(), saveProduct.getPrice(), saveProduct.getStock(),
-                saveProduct.getStatus(), saveProduct.getCreatedAt());
+        return CreateProductResponse.from(saveProduct);
     }
 
     // 상품 리스트 조회 - 페이징 + 정렬/필터/키워드
@@ -78,12 +80,29 @@ public class ProductService {
                 product.getStock(), product.getStatus(), product.getCreatedAt(),
                 product.getAdmin().getName(), product.getAdmin().getEmail()
         );
+    // 상품 리스트 조회
+    @Transactional
+    public List<GetProductsResponse> getAllProducts(Long adminId) {
+        checkLogin(adminId);
+
+        List<Product> products = productRepository.findAll();
+        return products.stream().map(GetProductsResponse::from).toList();
+    }
+
+    // 상품 상세 조회
+    @Transactional
+    public GetProductResponse getOneProduct(Long id, Long adminId) {
+        checkLogin(adminId);
+        Product product = checkKey(id);
+
+        return GetProductResponse.from(product);
     }
 
     // 상품 업데이트
     @Transactional
-    public UpdateProductResponse updateProduct(Long id, UpdateProductRequest request) {
-        Product product = check(id);
+    public UpdateProductResponse updateProduct(Long id, UpdateProductRequest request, Long adminId) {
+        checkLogin(adminId);
+        Product product = checkKey(id);
 
         product.editProduct(request.getProduct_name(), request.getCategory(), request.getPrice());
         return new UpdateProductResponse(product.getId());
@@ -91,8 +110,9 @@ public class ProductService {
 
     // 6. 재고 수정 - 실제 상태 자동 전환 로직은 Product.editStock() 안에서 처리
     @Transactional
-    public UpdateProductStockResponse updateProductStock(Long id, UpdateProductStockRequest request) {
-        Product product = check(id);
+    public UpdateProductStockResponse updateProductStock(Long id, UpdateProductStockRequest request, Long adminId) {
+        checkLogin(adminId);
+        Product product = checkKey(id);
 
         product.editStock(request.getStock());
         return new UpdateProductStockResponse(product.getId(), product.getStock(), product.getStatus());
@@ -100,8 +120,9 @@ public class ProductService {
 
     // 상품 상태 수정
     @Transactional
-    public UpdateProductStatusResponse updateProductStatus(Long id, UpdateProductStatusRequest request) {
-        Product product = check(id);
+    public UpdateProductStatusResponse updateProductStatus(Long id, UpdateProductStatusRequest request, Long adminId) {
+        checkLogin(adminId);
+        Product product = checkKey(id);
 
         product.editStatus(request.getStatus());
         return new UpdateProductStatusResponse(product.getId(), product.getStatus());
@@ -109,16 +130,25 @@ public class ProductService {
 
     // 상품 삭제
     @Transactional
-    public void deleteProduct(Long id) {
-        Product product = check(id);
+    public void deleteProduct(Long id, Long adminId) {
+        checkLogin(adminId);
+        Product product = checkKey(id);
 
         productRepository.delete(product);
     }
 
     // 손 댈 상품 키 선정
-    private Product check(Long id) {
+    private Product checkKey(Long id) {
         return productRepository.findById(id).orElseThrow(
                 () -> new ServiceException("유효하지 않은 상품", HttpStatus.NOT_FOUND) // 404
         );
+    }
+}
+
+    // 관리자 로그인 여부 확인
+    private void checkLogin(Long loginUserId) {
+        if (loginUserId == null) {
+            throw new ServiceException("로그인이 필요합니다.", HttpStatus.FORBIDDEN); // 401
+        }
     }
 }
