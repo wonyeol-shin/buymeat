@@ -6,14 +6,17 @@ import com.example.ecommercesystemproject.admin.entity.AdminSpecification;
 import com.example.ecommercesystemproject.admin.entity.Role;
 import com.example.ecommercesystemproject.admin.entity.Status;
 import com.example.ecommercesystemproject.admin.repository.AdminRepository;
+import com.example.ecommercesystemproject.common.ServiceException;
 import com.example.ecommercesystemproject.common.config.PasswordEncoder;
 import com.example.ecommercesystemproject.common.exception.AccountNotActiveException;
 import com.example.ecommercesystemproject.common.exception.DifferentPasswordException;
 import com.example.ecommercesystemproject.common.exception.IsNotSuperAccountException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,7 +91,7 @@ public class AdminService {
 
         // 찾을려는 관리자가 없는 관리자
         Admin findedAdmin = adminRepository.findById(sessionAdminId).orElseThrow(
-                () -> new IllegalStateException("존재하지 않는 관리자")
+                () ->  new ServiceException("없는 유저입니다", HttpStatus.BAD_REQUEST)
         );
 
 
@@ -115,7 +118,7 @@ public class AdminService {
 
 
         Admin findedAdmin = adminRepository.findById(adminId).orElseThrow(
-                () -> new IllegalStateException("없는 유저")
+                () ->  new ServiceException("없는 유저입니다", HttpStatus.BAD_REQUEST)
         );
 
         findedAdmin.updateProfile(request.getName(), request.getEmail(), request.getPhone());
@@ -134,15 +137,15 @@ public class AdminService {
 
 
         Admin findedAdmin = adminRepository.findById(adminId).orElseThrow(
-                () -> new IllegalStateException("없는 유저")
+                () ->  new ServiceException("없는 유저입니다", HttpStatus.BAD_REQUEST)
         );
 
         // 존재하지 않는 상태로 업데이트 시도 체크
         try {
             Status status = request.getStatus();
             findedAdmin.updateNormalStatus(status);
-        } catch (Exception e) {
-            throw new RuntimeException("없는 상태");
+        } catch (ServiceException e) {
+            throw new ServiceException("없는 상태 입니다.",HttpStatus.BAD_REQUEST );
         }
 
     }
@@ -159,14 +162,14 @@ public class AdminService {
         checkSuperAccount(admin.getRole());
 
         Admin findedAdmin = adminRepository.findById(adminId).orElseThrow(
-                () -> new IllegalStateException("없는 유저")
+                () -> new ServiceException("없는 유저입니다", HttpStatus.BAD_REQUEST)
         );
 
         try {
             Role role = request.getRole();
             findedAdmin.updateRole(role);
-        } catch (Exception e) {
-            throw new RuntimeException("없는 역할");
+        } catch (ServiceException e) {
+            throw new ServiceException("없는 역할입니디.",HttpStatus.BAD_REQUEST );
         }
     }
 
@@ -204,4 +207,26 @@ public class AdminService {
 
     }
 
+    // 승인 대기 상태의 관리자 상태를 거절한다.
+    @Transactional
+    public void rejectAdmin(Long adminId, @Valid RejectAdminRequest request, Long sessionAdminId) {
+
+        // 로그인 한 계정이 존재하지 않는 id 일경우 에러, 유효하면 Admin return
+        Admin admin = findAdminExist(sessionAdminId);
+
+        checkActiveAccount(admin.getStatus());
+        checkSuperAccount(admin.getRole());
+
+
+        Admin findedAdmin = adminRepository.findById(adminId).orElseThrow(
+                () -> new ServiceException("없는 유저입니다", HttpStatus.BAD_REQUEST)
+        );
+
+        if (findedAdmin.getStatus() != Status.STANDBY) {
+            throw new ServiceException("관리자의 상태가 승인대기 상태가 아닙니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        findedAdmin.reject(request.getRejectReason());
+
+    }
 }

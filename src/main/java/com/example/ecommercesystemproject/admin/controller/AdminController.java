@@ -65,6 +65,17 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    // SUPER Role 계정만 가능, 관리자 상태 변경
+    @PatchMapping("{admindId}/dismiss")
+    public ResponseEntity<Void> rejectAdmin(
+            @PathVariable Long adminId,
+            @Valid @RequestBody RejectAdminRequest request,
+            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+    ) {
+        adminService.rejectAdmin(adminId,request, adminSession.getId()) );
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     // SUPER Role 계정만 가능, 관리자 역할 변경
     @PatchMapping("/{adminId}/role")
     public ResponseEntity<Void> updateRole(
