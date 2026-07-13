@@ -4,6 +4,9 @@ import com.example.ecommercesystemproject.admin.dto.*;
 import com.example.ecommercesystemproject.admin.entity.Role;
 import com.example.ecommercesystemproject.admin.entity.Status;
 import com.example.ecommercesystemproject.admin.service.AdminService;
+import com.example.ecommercesystemproject.common.constant.SessionConst;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RestController
 @RequestMapping("/api/admins")
 @RequiredArgsConstructor
 public class AdminController {
@@ -79,6 +83,18 @@ public class AdminController {
             @SessionAttribute(name = "adminLogin", required = false) AdminSession adminSession
     ) {
         adminService.updateAdminRole(adminId, request, adminSession.getId());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PatchMapping("/{adminId}/account/status")
+    public ResponseEntity<Void> updateAccountStatus(
+            @PathVariable Long adminId,
+            @RequestBody @Valid UpdateAdminStatusRequest updateAdminStatusRequest,
+            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+    ) {
+        Long sessionAdminId = adminSession.getId();
+
+        adminService.updateAdminAccountStatus(adminId, updateAdminStatusRequest, sessionAdminId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
