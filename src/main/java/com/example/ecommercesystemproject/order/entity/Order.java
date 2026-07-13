@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 
 @Getter
 @Entity
@@ -41,6 +42,8 @@ public class Order extends BaseEntity {
     @Column(nullable = false)
     private long totalPrice;
 
+    private String cancellationReason;
+
     public Order(int quantity, String orderNumber, long totalPrice) {
         this.status = OrderStatus.PREPARING;
         this.quantity = quantity;
@@ -50,5 +53,10 @@ public class Order extends BaseEntity {
 
     public void updateStatus(OrderStatus status) {
         this.status = status;
+    }
+
+    public void cancel(String cancellationReason) {
+        this.status = OrderStatus.CANCELED;
+        this.cancellationReason = cancellationReason;
     }
 }
