@@ -1,10 +1,11 @@
 package com.example.ecommercesystemproject.product.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import com.example.ecommercesystemproject.product.entity.ProductStatus;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
 public class UpdateProductStatusRequest {
-    @NotBlank
-    private String status;
+    @NotNull
+    private ProductStatus status;
 }

@@ -25,15 +25,16 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     private Integer stock;
 
-    @Column(nullable = false, length = 10)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private ProductStatus status;
 
     //@ManyToOne(optional = false)
     //@JoinColumn(nullable = false)
     //private Admin admin_id;
 
     // 상품 등록
-    public Product(String n, String c, Long p, Integer s, String a) {
+    public Product(String n, String c, Long p, Integer s, ProductStatus a) {
         this.product_name = n;
         this.category = c;
         this.price = p;
@@ -54,7 +55,7 @@ public class Product extends BaseEntity {
     }
 
     // 상태 수정
-    public void editStatus(String a) {
+    public void editStatus(ProductStatus a) {
         this.status = a;
     }
 }
