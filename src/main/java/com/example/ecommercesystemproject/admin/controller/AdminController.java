@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequestMapping
+@RequestMapping("/api/admins")
 @RequiredArgsConstructor
 public class AdminController {
     private final AdminService adminService;
 
     // 다건 조회 + 조건 조회, (최소 관리자 이상만 조회 가능) AdminSession은 Auth에서 추가 후 교체 필요
-    @GetMapping("/api/admins")
+    @GetMapping("")
     public ResponseEntity<Page<GetAllAdminResponse>> getAll(
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
@@ -36,7 +36,7 @@ public class AdminController {
     }
 
     // 단건조회, (최소 관리자 이상만 조회 가능)
-    @GetMapping("/api/admins/{adminId}")
+    @GetMapping("/{adminId}")
     public ResponseEntity<GetOneAdminResponse> getOne(
             @PathVariable Long adminId,
             @SessionAttribute(name = "adminLogin", required = false) AdminSession adminSession
@@ -45,7 +45,7 @@ public class AdminController {
     }
 
     // SUPER Role 계정만 가능, 원하는 관리자 정보 수정
-    @PatchMapping("/api/admins/{adminId}")
+    @PatchMapping("/{adminId}")
     public ResponseEntity<Void> updateOne(
             @Valid @RequestBody UpdateAdminRequest request,
             @PathVariable Long adminId,
@@ -56,7 +56,7 @@ public class AdminController {
     }
 
     // SUPER Role 계정만 가능, 관리자 상태 변경
-    @PatchMapping("/api/admins/{adminId}/status")
+    @PatchMapping("/{adminId}/status")
     public ResponseEntity<Void> updateStatus(
             @PathVariable Long adminId,
             @Valid @RequestBody UpdateAdminStatusRequest request,
@@ -67,7 +67,7 @@ public class AdminController {
     }
 
     // SUPER Role 계정만 가능, 관리자 역할 변경
-    @PatchMapping("/api/admins/{adminId}/role")
+    @PatchMapping("/{adminId}/role")
     public ResponseEntity<Void> updateRole(
             @PathVariable Long adminId,
             @Valid @RequestBody UpdateAdminRoleRequest request,
@@ -78,7 +78,7 @@ public class AdminController {
     }
 
     // 로그인 한 관리자의 패스워드 변경
-    @PatchMapping("/api/admins/password")
+    @PatchMapping("/password")
     public ResponseEntity<Void> updateMyPassword(
             @Valid @RequestBody UpdateMyPasswordRequest request,
             @SessionAttribute(name = "adminLogin", required = false) AdminSession adminSession
@@ -89,7 +89,7 @@ public class AdminController {
     }
 
     //  로그인 한 관리자의 프로필 정보 변경
-    @PatchMapping("/api/admins/profile")
+    @PatchMapping("/profile")
     public ResponseEntity<Void> updateMyProfile(
             @Valid @RequestBody UpdateAdminRequest request,
             @SessionAttribute(name = "adminLogin", required = false) AdminSession adminSession

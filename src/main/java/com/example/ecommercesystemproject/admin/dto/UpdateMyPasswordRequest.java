@@ -11,12 +11,12 @@ public class UpdateMyPasswordRequest {
     private String oldPassword;
 
     @NotBlank(message = "변경 할 패스워드를 입력하세요")
-    @Min(value = 6, message = "비밀번호는 최소 6글자 이상 입력하세요")
+    @Min(value = 8, message = "비밀번호는 최소 6글자 이상 입력하세요")
     @Max(value = 255, message = "비밀번호는 최대 255 글자까지 입력가능합니다.")
     private String newPassword;
 
     @NotBlank(message = "검증 패스워드를 입력하세요")
-    @Min(value = 6, message = "비밀번호는 최소 6글자 이상 입력하세요")
+    @Min(value = 8, message = "비밀번호는 최소 6글자 이상 입력하세요")
     @Max(value = 255, message = "비밀번호는 최대 255 글자까지 입력가능합니다.")
     private String checkPassword;
 }
