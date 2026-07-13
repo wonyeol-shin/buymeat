@@ -1,8 +1,6 @@
 package com.example.ecommercesystemproject.order.controller;
 
-import com.example.ecommercesystemproject.order.dto.CreateOrderRequest;
-import com.example.ecommercesystemproject.order.dto.CreateOrderResponse;
-import com.example.ecommercesystemproject.order.dto.GetOrderResponse;
+import com.example.ecommercesystemproject.order.dto.*;
 import com.example.ecommercesystemproject.order.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +33,13 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOneOrder(orderId));
     }
 
+    @PatchMapping("/{orderId}/status")
+    public ResponseEntity<UpdateOrderResponse> update(
+            @PathVariable Long orderId,
+            @Valid @RequestBody UpdateOrderRequest request
+            ) {
+        return ResponseEntity.ok(orderService.update(orderId,request));
+    }
 
 
 }

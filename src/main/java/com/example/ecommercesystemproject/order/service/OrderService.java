@@ -1,9 +1,7 @@
 package com.example.ecommercesystemproject.order.service;
 
 import com.example.ecommercesystemproject.admin.entity.Role;
-import com.example.ecommercesystemproject.order.dto.CreateOrderRequest;
-import com.example.ecommercesystemproject.order.dto.CreateOrderResponse;
-import com.example.ecommercesystemproject.order.dto.GetOrderResponse;
+import com.example.ecommercesystemproject.order.dto.*;
 import com.example.ecommercesystemproject.order.entity.Order;
 import com.example.ecommercesystemproject.order.repository.OrderRepository;
 import com.example.ecommercesystemproject.order.util.OrderNumberGenerator;
@@ -74,6 +72,31 @@ public class OrderService {
                 () -> new IllegalStateException("없는 주문입니다.")
         );
         return new GetOrderResponse(
+                order.getId(),
+                order.getOrderNumber(),
+                "customerName",
+                "productName",
+                order.getQuantity(),
+                order.getCreatedAt().toLocalDate(),
+                order.getStatus(),
+                order.getTotalPrice(),
+                "customerEmail",
+                1L,
+                "adminName",
+                "adminEmail",
+                Role.OP
+        );
+    }
+
+    @Transactional
+    public UpdateOrderResponse update(Long orderId, UpdateOrderRequest request) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new IllegalStateException("없는 주문입니다.")
+        );
+
+        order.updateStatus(request.getStatus());
+
+        return new UpdateOrderResponse(
                 order.getId(),
                 order.getOrderNumber(),
                 "customerName",
