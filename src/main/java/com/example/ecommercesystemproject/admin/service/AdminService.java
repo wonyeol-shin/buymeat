@@ -126,7 +126,7 @@ public class AdminService {
     }
 
     @Transactional
-    public void updateAdminAccountStatus(Long adminId, UpdateAdminStatusRequest updateAdminStatusRequest, Long sessionAdminId) {
+    public void approveAdmin(Long adminId, Long sessionAdminId) {
         Admin admin = findAdminExist(sessionAdminId);
 
         if (admin.getStatus() != Status.ACTIVE && admin.getRole() != Role.SUPER)
@@ -139,7 +139,7 @@ public class AdminService {
             throw new ServiceException("승인 대기 상태가 아닌 계정은 승인/거부할 수 없습니다.", HttpStatus.BAD_REQUEST);
         }
 
-        findedAdmin.updateNormalStatus(updateAdminStatusRequest.getStatus());
+        findedAdmin.approve();
         adminRepository.save(findedAdmin);
     }
 
