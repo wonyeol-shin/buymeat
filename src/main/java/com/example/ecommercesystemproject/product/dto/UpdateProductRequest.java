@@ -1,16 +1,17 @@
 package com.example.ecommercesystemproject.product.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 
 @Getter
 public class UpdateProductRequest {
-    @NotBlank
+    @NotBlank(message = "상품명 입력 누락")
     private String product_name;
 
-    @NotBlank
+    @NotBlank(message = "목록 입력 누락")
     private String category;
 
-    @NotBlank
+    @NotNull(message = "가격 입력 누락")
+    @PositiveOrZero(message = "유효하지 않은 가격 값")
     private Long price;
 }

@@ -1,5 +1,7 @@
 package com.example.ecommercesystemproject.product.service;
 
+import com.example.ecommercesystemproject.admin.entity.Admin;
+import com.example.ecommercesystemproject.admin.repository.AdminRepository;
 import com.example.ecommercesystemproject.common.ServiceException;
 import com.example.ecommercesystemproject.product.dto.*;
 import com.example.ecommercesystemproject.product.entity.Product;
@@ -15,44 +17,45 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final AdminRepository adminRepository;
 
     // 상품 등록
     @Transactional
-    public CreateProductResponse createProduct(CreateProductRequest request) {
+    public CreateProductResponse createProduct(CreateProductRequest request, Long adminId) {
+        Admin admin = adminRepository.findById(adminId)
+                .orElseThrow(() -> new ServiceException("유효하지 않은 관리자", HttpStatus.NOT_FOUND));
+        checkLogin(adminId);
+
         Product product = new Product(request.getProduct_name(), request.getCategory(),
-                request.getPrice(), request.getStock(), request.getStatus());
+                request.getPrice(), request.getStock(), admin);
 
         Product saveProduct = productRepository.save(product);
-
-        return new CreateProductResponse(saveProduct.getId(), saveProduct.getProduct_name(),
-                saveProduct.getCategory(), saveProduct.getPrice(), saveProduct.getStock(),
-                saveProduct.getStatus(), saveProduct.getCreatedAt());
+        return CreateProductResponse.from(saveProduct);
     }
 
-    // 상품 다 건 조회
+    // 상품 리스트 조회
     @Transactional
-    public List<GetProductResponse> getAllProducts() {
+    public List<GetProductsResponse> getAllProducts(Long adminId) {
+        checkLogin(adminId);
+
         List<Product> products = productRepository.findAll();
-
-        return products.stream()
-                .map(a -> new GetProductResponse(a.getId(), a.getProduct_name(), a.getCategory(),
-                        a.getPrice(), a.getStock(), a.getStatus(), a.getCreatedAt()))
-                .toList();
+        return products.stream().map(GetProductsResponse::from).toList();
     }
 
-    // 상품 단 건 조회
+    // 상품 상세 조회
     @Transactional
-    public GetProductResponse getOneProduct(Long id) {
-        Product product = check(id);
+    public GetProductResponse getOneProduct(Long id, Long adminId) {
+        checkLogin(adminId);
+        Product product = checkKey(id);
 
-        return new GetProductResponse(product.getId(), product.getProduct_name(), product.getCategory(), product.getPrice(),
-                product.getStock(), product.getStatus(), product.getCreatedAt());
+        return GetProductResponse.from(product);
     }
 
     // 상품 업데이트
     @Transactional
-    public UpdateProductResponse updateProduct(Long id, UpdateProductRequest request) {
-        Product product = check(id);
+    public UpdateProductResponse updateProduct(Long id, UpdateProductRequest request, Long adminId) {
+        checkLogin(adminId);
+        Product product = checkKey(id);
 
         product.editProduct(request.getProduct_name(), request.getCategory(), request.getPrice());
         return new UpdateProductResponse(product.getId());
@@ -60,8 +63,9 @@ public class ProductService {
 
     // 상품 재고 수정
     @Transactional
-    public UpdateProductStockResponse updateProductStock(Long id, UpdateProductStockRequest request) {
-        Product product = check(id);
+    public UpdateProductStockResponse updateProductStock(Long id, UpdateProductStockRequest request, Long adminId) {
+        checkLogin(adminId);
+        Product product = checkKey(id);
 
         product.editStock(request.getStock());
         return new UpdateProductStockResponse(product.getId(), product.getStock(), product.getStatus());
@@ -69,25 +73,34 @@ public class ProductService {
 
     // 상품 상태 수정
     @Transactional
-    public UpdateProductStatusResponse updateProductStatus(Long id, UpdateProductStatusRequest request) {
-        Product product = check(id);
+    public UpdateProductStatusResponse updateProductStatus(Long id, UpdateProductStatusRequest request, Long adminId) {
+        checkLogin(adminId);
+        Product product = checkKey(id);
 
-        product.editStatus(request.getStatus());
+        product.editStatus(String.valueOf(request.getStatus()));
         return new UpdateProductStatusResponse(product.getId(), product.getStatus());
     }
 
     // 상품 삭제
     @Transactional
-    public void deleteProduct(Long id) {
-        Product product = check(id);
+    public void deleteProduct(Long id, Long adminId) {
+        checkLogin(adminId);
+        Product product = checkKey(id);
 
         productRepository.delete(product);
     }
 
     // 손 댈 상품 키 선정
-    private Product check(Long id) {
+    private Product checkKey(Long id) {
         return productRepository.findById(id).orElseThrow(
                 () -> new ServiceException("유효하지 않은 상품", HttpStatus.NOT_FOUND) // 404
         );
+    }
+
+    // 관리자 로그인 여부 확인
+    private void checkLogin(Long loginUserId) {
+        if (loginUserId == null) {
+            throw new ServiceException("로그인이 필요합니다.", HttpStatus.FORBIDDEN); // 401
+        }
     }
 }
