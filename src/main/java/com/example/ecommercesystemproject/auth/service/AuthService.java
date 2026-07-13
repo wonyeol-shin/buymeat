@@ -30,17 +30,19 @@ public class AuthService {
 
     @Transactional
     public SignupResponse signup(SignupRequest request) {
-
+        // 이메일 중복 체크
         if (adminRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateEmailException("이미 등록된 이메일입니다.");
         }
-
+        // 전화번호 중복 체크
         if (adminRepository.existsByPhone(request.getPhone())) {
             throw new DuplicatePhoneException("이미 등록된 전화번호입니다.");
         }
 
+        // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
+        // Admin 엔티티 생성(아직 DB에 저장 전, 메모리에만 존재)
         Admin admin = new Admin(
                 request.getName(),
                 request.getEmail(),
@@ -49,35 +51,42 @@ public class AuthService {
                 request.getRole(),
                 request.getWhyAdminReason()
         );
-
+        // 실제 DB에 저장
         Admin savedAdmin = adminRepository.save(admin);
+
         return new SignupResponse(savedAdmin);
     }
 
     public LoginResponse login(LoginRequest request, HttpServletRequest httpRequest) {
+
+        // 이메일로 Admin 조회, 없으면 예외 발생
         Admin admin = adminRepository.findByEmail(request.getEmail()).orElseThrow(
                 () -> new InvalidCredentialsException("이메일 또는 비밀번호가 일치하지 않습니다."));
 
+        // 비밀번호 일치 여부 확인
         if (!passwordEncoder.matches(request.getPassword(), admin.getPassword())) {
             throw  new InvalidCredentialsException("이메일 또는 비밀번호가 일치하지 않습니다.");
         }
-
+        // 계정 생성 확인
         validateAccountStatus(admin.getStatus());
 
+        // 세션 생성
         HttpSession session = httpRequest.getSession(true);
+        // 세션에 로그인 정보 저장
         session.setAttribute(SessionConst.LOGIN_ADMIN_ID, admin.getId());
         session.setAttribute(SessionConst.LOGIN_ADMIN_EMAIL, admin.getEmail());
         session.setAttribute(SessionConst.LOGIN_ADMIN_ROLE, admin.getRole());
+        // 세션 유효시간 설정
         session.setMaxInactiveInterval(SessionConst.SESSION_TIMEOUT_SECONDS);
 
         return new LoginResponse(admin);
     }
 
     public void logout(HttpServletRequest httpRequest) {
-        HttpSession session = httpRequest.getSession(false);
+        HttpSession session = httpRequest.getSession(false); // 세션이 없으면 새로 만들지 않고 null 반환
         if (session != null) {
-            session.invalidate();
-        }
+            session.invalidate(); // 서버에 저장된 세션 데이터를 완전히 삭제
+        } // 세션이 원래 없었으면 그냥 아무것도 안하고 넘어감
     }
 
     private void validateAccountStatus(Status status) {
