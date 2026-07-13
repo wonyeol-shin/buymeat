@@ -1,6 +1,9 @@
 package com.example.ecommercesystemproject.order.entity;
 
+import com.example.ecommercesystemproject.admin.entity.Admin;
 import com.example.ecommercesystemproject.common.BaseEntity;
+import com.example.ecommercesystemproject.customer.entity.Customer;
+import com.example.ecommercesystemproject.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -27,17 +30,17 @@ public class Order extends BaseEntity {
     @Column(nullable = false, unique = true, length = 50)
     private String orderNumber;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "admin_id")
-//    private Admin admin;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admin_id")
+    private Admin admin;
 
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "product_id", nullable = false)
-//    private Product product;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "customer_id", nullable = false)
-//    private Customer customer;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 
     @Column(nullable = false)
     private long totalPrice;

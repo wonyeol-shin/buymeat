@@ -22,7 +22,6 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
 
     // 고객 생성
-    //TODO : 베이스 엔티티 추가되면 생성일 넣기
     @Transactional
     public CreateCustomerResponse createCustomer(CreateCustomerRequest request) {
         Customer customer = new Customer(request.getName(), request.getEmail(), request.getPhone());
