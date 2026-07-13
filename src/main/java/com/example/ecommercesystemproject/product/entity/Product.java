@@ -1,83 +1,64 @@
 package com.example.ecommercesystemproject.product.entity;
 
 import com.example.ecommercesystemproject.admin.entity.Admin;
-import com.example.ecommercesystemproject.common.BaseEntity;
+// import com.example.ecommercesystemproject.common.entity.BaseTimeEntity; // 생성일, 수정일 상속 클래스가 있다면 사용
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Table(name = "products")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Product extends BaseEntity {
+@NoArgsConstructor
+public class Product {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
-    private String product_name;
-
-    @Column(nullable = false, length = 50)
+    private String productName;
     private String category;
-
-    @Column(nullable = false)
     private Long price;
-
-    @Column(nullable = false)
     private Integer stock;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
     private ProductStatus status;
 
-    // 주석 해제 + admin_id -> admin 으로 필드명 변경 (연관관계 필드는 객체를 그대로 가리키는게 컨벤션)
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id", nullable = false)
     private Admin admin;
 
-    // 상품 등록 (admin 파라미터 추가됨 - 등록 관리자 저장을 위해 필수)
-    // 변수명을... 한글자로 쓰는거.. 괜찮을까요....???
-    public Product(String n, String c, Long p, Integer s, String a, Admin admin) {
-    @ManyToOne(optional = false)
-    @JoinColumn(nullable = false)
-    private Admin admin_id;
+    private LocalDateTime createdAt; // BaseTimeEntity가 없다면 직접 선언
 
-    // 상품 등록
-    public Product(String n, String c, Long p, Integer s, Admin a) {
-        this.product_name = n;
-        this.category = c;
-        this.price = p;
-        this.stock = s;
-        this.status = a;
+    // [중요] 1. 서비스의 createProduct에서 사용하는 5개짜리 생성자
+    public Product(String productName, String category, Long price, Integer stock, Admin admin) {
+        this.productName = productName;
+        this.category = category;
+        this.price = price;
+        this.stock = stock;
         this.admin = admin;
-        this.admin_id = a;
-        this.status = ProductStatus.ON_SALE; // 기본값 설정
+        this.status = ProductStatus.ACTIVE; // 기본 상태 설정 (필요에 따라 변경)
+        this.createdAt = LocalDateTime.now();
     }
 
-    // 상품 업데이트
-    public void editProduct(String name, String ctg, Long p) {
-        this.product_name = name;
-        this.category = ctg;
-        this.price = p;
+    // [중요] 2. 서비스의 updateProduct에서 사용하는 비즈니스 메서드
+    public void editProduct(String productName, String category, Long price) {
+        this.productName = productName;
+        this.category = category;
+        this.price = price;
     }
 
-    // 재고 수정 + 상태 자동 전환
-    // 재고 0 이하 -> SOLD_OUT
-    // 재고 1 이상 -> ON_SALE
-    // 현재 상태가 DISCONTINUED(단종)이면 재고 값만 바뀌고 상태는 유지
-    public void editStock(Integer newStock) {
-        this.stock = newStock;
-
-        if ("DISCONTINUED".equals(this.status)) { // // ENUM을 무엇으로 하는지 보고 수정 필요.
-            return;
+    // [중요] 3. 서비스의 updateProductStock에서 사용하는 비즈니스 메서드
+    public void editStock(Integer stock) {
+        this.stock = stock;
+        // 예시: 재고가 0이 되면 자동으로 품절(SOLD_OUT) 상태로 변경하는 로직
+        if (this.stock <= 0) {
+            this.status = ProductStatus.SOLD_OUT;
         }
-
-        this.status = (newStock <= 0) ? "SOLD_OUT" : "ON_SALE"; // ENUM을 무엇으로 하는지 보고 수정 필요.
     }
 
-    // 상태 수정
-    public void editStatus(ProductStatus s) {
-        this.status = s;
+    // [중요] 4. 서비스의 updateProductStatus에서 사용하는 비즈니스 메서드
+    public void editStatus(ProductStatus status) {
+        this.status = status;
     }
 }
-// 브랜치 rebase 후 다시 푸쉬
