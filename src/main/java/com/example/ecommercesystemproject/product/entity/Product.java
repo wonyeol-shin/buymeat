@@ -64,7 +64,7 @@ public class Product extends BaseEntity {
 
     public void restoreStock(int quantity) {
         if (quantity <= 0) {
-            throw new BadRequestException(
+            throw new IllegalStateException(
                     "복구할 재고 수량은 1개 이상이어야 합니다."
             );
         }
