@@ -87,15 +87,14 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @PatchMapping("/{adminId}/account/status")
-    public ResponseEntity<Void> updateAccountStatus(
+    @PatchMapping("/{adminId}/approve")
+    public ResponseEntity<Void> approveAdmin(
             @PathVariable Long adminId,
-            @RequestBody @Valid UpdateAdminStatusRequest updateAdminStatusRequest,
             @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
     ) {
         Long sessionAdminId = adminSession.getId();
 
-        adminService.updateAdminAccountStatus(adminId, updateAdminStatusRequest, sessionAdminId);
+        adminService.approveAdmin(adminId, sessionAdminId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
