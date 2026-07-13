@@ -1,6 +1,8 @@
 package com.example.ecommercesystemproject.product.dto;
 
+import com.example.ecommercesystemproject.product.entity.ProductStatus;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
@@ -17,6 +19,6 @@ public class CreateProductRequest {
     @NotBlank
     private Integer stock;
 
-    @NotBlank
-    private String status;
+    @NotNull
+    private ProductStatus status;
 }
