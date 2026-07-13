@@ -18,7 +18,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
 
     @Transactional
-    public CreateOrderResponse create(CreateOrderRequest request) {
+    public OrderResponse create(CreateOrderRequest request) {
 
         // long totalPrice = (long) product.getPrice() * request.getQuantity();
         Order order = new Order(
@@ -28,94 +28,43 @@ public class OrderService {
                 );
         Order savedOrder = orderRepository.save(order);
 
-        // 임시값 수정 해야함
-        return new CreateOrderResponse(
-                savedOrder.getId(),
-                savedOrder.getOrderNumber(),
-                "customer",
-                "product",
-                savedOrder.getQuantity(),
-                savedOrder.getCreatedAt().toLocalDate(),
-                savedOrder.getStatus(),
-                savedOrder.getTotalPrice(),
-                "customerEmail",
-                1L,
-                "adminName",
-                "adminEmail",
-                Role.OP
-        );
+        return toResponse(order);
     }
 
-    public List<GetOrderResponse> getAllOrder() {
+    public List<OrderResponse> getAllOrder() {
         return orderRepository.findAll()
                 .stream()
-                .map(order -> new GetOrderResponse(
-                        order.getId(),
-                        order.getOrderNumber(),
-                        "customerName",
-                        "productName",
-                        order.getQuantity(),
-                        order.getCreatedAt().toLocalDate(),
-                        order.getStatus(),
-                        order.getTotalPrice(),
-                        "customerEmail",
-                        1L,
-                        "adminName",
-                        "adminEmail",
-                        Role.OP
-                ))
+                .map(this::toResponse)
                 .toList();
     }
 
-    public GetOrderResponse getOneOrder(Long orderId) {
+    public OrderResponse getOneOrder(Long orderId) {
         Order order = getOrderOrThrow(orderId);
-        return new GetOrderResponse(
-                order.getId(),
-                order.getOrderNumber(),
-                "customerName",
-                "productName",
-                order.getQuantity(),
-                order.getCreatedAt().toLocalDate(),
-                order.getStatus(),
-                order.getTotalPrice(),
-                "customerEmail",
-                1L,
-                "adminName",
-                "adminEmail",
-                Role.OP
-        );
+        return toResponse(order);
     }
 
 
 
     @Transactional
-    public UpdateOrderResponse updateOrder(Long orderId, UpdateOrderRequest request) {
+    public OrderResponse updateOrder(Long orderId, UpdateOrderRequest request) {
         Order order = getOrderOrThrow(orderId);
 
         order.updateStatus(request.getStatus());
 
-        return new UpdateOrderResponse(
-                order.getId(),
-                order.getOrderNumber(),
-                "customerName",
-                "productName",
-                order.getQuantity(),
-                order.getCreatedAt().toLocalDate(),
-                order.getStatus(),
-                order.getTotalPrice(),
-                "customerEmail",
-                1L,
-                "adminName",
-                "adminEmail",
-                Role.OP
-        );
+        return toResponse(order);
     }
 
     @Transactional
-    public DeleteOrderResponse cancelOrder(Long orderId, DeleteOrderRequest request) {
+    public OrderResponse cancelOrder(Long orderId, DeleteOrderRequest request) {
         Order order = getOrderOrThrow(orderId);
         order.cancel(request.getCancellationReason());
-        return new DeleteOrderResponse(
+        return toResponse(order);
+    }
+
+
+    // 임시값 수정 해야함
+    private OrderResponse toResponse(Order order) {
+        return new OrderResponse(
                 order.getId(),
                 order.getOrderNumber(),
                 "customerName",

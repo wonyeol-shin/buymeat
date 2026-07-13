@@ -17,24 +17,24 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<CreateOrderResponse> create(
+    public ResponseEntity<OrderResponse> create(
             @Valid @RequestBody CreateOrderRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<GetOrderResponse>> getAll() {
+    public ResponseEntity<List<OrderResponse>> getAll() {
         return ResponseEntity.ok(orderService.getAllOrder());
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<GetOrderResponse> getOne(@PathVariable Long orderId) {
+    public ResponseEntity<OrderResponse> getOne(@PathVariable Long orderId) {
         return ResponseEntity.ok(orderService.getOneOrder(orderId));
     }
 
     @PatchMapping("/{orderId}/status")
-    public ResponseEntity<UpdateOrderResponse> update(
+    public ResponseEntity<OrderResponse> update(
             @PathVariable Long orderId,
             @Valid @RequestBody UpdateOrderRequest request
     ) {
@@ -42,7 +42,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{orderId}/cancel")
-    public ResponseEntity<DeleteOrderResponse> cancel(
+    public ResponseEntity<OrderResponse> cancel(
             @PathVariable Long orderId,
             @Valid @RequestBody DeleteOrderRequest request
     ) {

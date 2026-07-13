@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
-public class GetOrderResponse {
+public class OrderResponse {
     private final Long id;
     private final String orderNumber;
     private final String customerName;
@@ -23,8 +23,9 @@ public class GetOrderResponse {
     private final String createdByAdminName;
     private final String createdByAdminEmail;
     private final Role createdByAdminRole;
+    private final String cancellationReason;
 
-    public GetOrderResponse(Long id, String orderNumber, String customerName, String productName, int quantity, LocalDate orderDate, OrderStatus status, long totalPrice, String customerEmail, Long createdByAdminId, String createdByAdminName, String createdByAdminEmail, Role createdByAdminRole) {
+    public OrderResponse(Long id, String orderNumber, String customerName, String productName, int quantity, LocalDate orderDate, OrderStatus status, long totalPrice, String customerEmail, Long createdByAdminId, String createdByAdminName, String createdByAdminEmail, Role createdByAdminRole, String cancellationReason) {
         this.id = id;
         this.orderNumber = orderNumber;
         this.customerName = customerName;
@@ -38,5 +39,6 @@ public class GetOrderResponse {
         this.createdByAdminName = createdByAdminName;
         this.createdByAdminEmail = createdByAdminEmail;
         this.createdByAdminRole = createdByAdminRole;
+        this.cancellationReason = cancellationReason;
     }
 }
