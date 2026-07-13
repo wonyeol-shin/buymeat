@@ -6,6 +6,6 @@ import lombok.Getter;
 
 @Getter
 public class UpdateProductStatusRequest {
-    @NotNull
+    @NotNull(message = "상품 상태 입력 누락")
     private ProductStatus status;
 }

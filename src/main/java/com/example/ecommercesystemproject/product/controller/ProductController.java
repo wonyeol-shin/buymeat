@@ -1,7 +1,9 @@
 package com.example.ecommercesystemproject.product.controller;
 
+import com.example.ecommercesystemproject.admin.dto.AdminSession;
 import com.example.ecommercesystemproject.product.dto.*;
 import com.example.ecommercesystemproject.product.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -14,41 +16,66 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping("/api/products")
-    public ResponseEntity<CreateProductResponse> create(@RequestBody CreateProductRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(request)); // 201
+    public ResponseEntity<CreateProductResponse> create
+            (@Valid @RequestBody CreateProductRequest request,
+            @SessionAttribute(name = "loginAdmin", required = false) AdminSession loginAdmin) {
+
+        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(productService.createProduct(request, longAdminId)); // 201
     }
 
     @GetMapping("/api/products")
-    public ResponseEntity<List<GetProductResponse>> getAll() {
-        return ResponseEntity.ok(productService.getAllProducts()); // 200
+    public ResponseEntity<List<GetProductsResponse>> getAll
+            (@SessionAttribute(name = "loginAdmin", required = false) AdminSession loginAdmin) {
+
+        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
+        return ResponseEntity.ok(productService.getAllProducts(longAdminId)); // 200
     }
 
     @GetMapping("/api/products/{productId}")
-    public ResponseEntity<GetProductResponse> getOne(@PathVariable Long productId) {
-        return ResponseEntity.ok(productService.getOneProduct(productId));
+    public ResponseEntity<GetProductResponse> getOne
+            (@PathVariable Long productId,
+             @SessionAttribute(name = "loginAdmin", required = false) AdminSession loginAdmin) {
+
+        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
+        return ResponseEntity.ok(productService.getOneProduct(productId, longAdminId));
     }
 
     @PutMapping("/api/products/{productId}")
     public ResponseEntity<UpdateProductResponse> update
-            (@PathVariable Long productId, @RequestBody UpdateProductRequest request) {
-        return ResponseEntity.ok(productService.updateProduct(productId, request));
+            (@PathVariable Long productId, @Valid @RequestBody UpdateProductRequest request,
+             @SessionAttribute(name = "loginAdmin", required = false) AdminSession loginAdmin) {
+
+        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
+        return ResponseEntity.ok(productService.updateProduct(productId, request, longAdminId));
     }
 
     @PatchMapping("/api/products/{productId}/stock")
     public ResponseEntity<UpdateProductStockResponse> updateStock
-            (@PathVariable Long productId, @RequestBody UpdateProductStockRequest request) {
-        return ResponseEntity.ok(productService.updateProductStock(productId, request));
+            (@PathVariable Long productId, @Valid @RequestBody UpdateProductStockRequest request,
+             @SessionAttribute(name = "loginAdmin", required = false) AdminSession loginAdmin) {
+
+        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
+        return ResponseEntity.ok(productService.updateProductStock(productId, request, longAdminId));
     }
 
     @PatchMapping("/api/products/{productId}/status")
     public ResponseEntity<UpdateProductStatusResponse> updateStatus
-            (@PathVariable Long productId, @RequestBody UpdateProductStatusRequest request) {
-        return ResponseEntity.ok(productService.updateProductStatus(productId, request));
+            (@PathVariable Long productId, @Valid @RequestBody UpdateProductStatusRequest request,
+             @SessionAttribute(name = "loginAdmin", required = false) AdminSession loginAdmin) {
+
+        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
+        return ResponseEntity.ok(productService.updateProductStatus(productId, request, longAdminId));
     }
 
     @DeleteMapping("/api/products/{productId}")
-    public ResponseEntity<Void> delete(@PathVariable Long productId) {
-        productService.deleteProduct(productId);
+    public ResponseEntity<Void> delete
+            (@PathVariable Long productId,
+             @SessionAttribute(name = "loginAdmin", required = false) AdminSession loginAdmin) {
+
+        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
+        productService.deleteProduct(productId, longAdminId);
         return ResponseEntity.noContent().build(); // 204
     }
 }
