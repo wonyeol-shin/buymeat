@@ -68,9 +68,7 @@ public class OrderService {
     }
 
     public GetOrderResponse getOneOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(
-                () -> new IllegalStateException("없는 주문입니다.")
-        );
+        Order order = getOrderOrThrow(orderId);
         return new GetOrderResponse(
                 order.getId(),
                 order.getOrderNumber(),
@@ -88,11 +86,11 @@ public class OrderService {
         );
     }
 
+
+
     @Transactional
-    public UpdateOrderResponse update(Long orderId, UpdateOrderRequest request) {
-        Order order = orderRepository.findById(orderId).orElseThrow(
-                () -> new IllegalStateException("없는 주문입니다.")
-        );
+    public UpdateOrderResponse updateOrder(Long orderId, UpdateOrderRequest request) {
+        Order order = getOrderOrThrow(orderId);
 
         order.updateStatus(request.getStatus());
 
@@ -113,5 +111,31 @@ public class OrderService {
         );
     }
 
+    @Transactional
+    public DeleteOrderResponse cancelOrder(Long orderId, DeleteOrderRequest request) {
+        Order order = getOrderOrThrow(orderId);
+        order.cancel(request.getCancellationReason());
+        return new DeleteOrderResponse(
+                order.getId(),
+                order.getOrderNumber(),
+                "customerName",
+                "productName",
+                order.getQuantity(),
+                order.getCreatedAt().toLocalDate(),
+                order.getStatus(),
+                order.getTotalPrice(),
+                "customerEmail",
+                1L,
+                "adminName",
+                "adminEmail",
+                Role.OP,
+                order.getCancellationReason()
+        );
+    }
 
+    private Order getOrderOrThrow(Long orderId) {
+        return orderRepository.findById(orderId).orElseThrow(
+                () -> new IllegalStateException("없는 주문입니다.")
+        );
+    }
 }

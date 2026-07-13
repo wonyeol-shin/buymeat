@@ -37,9 +37,15 @@ public class OrderController {
     public ResponseEntity<UpdateOrderResponse> update(
             @PathVariable Long orderId,
             @Valid @RequestBody UpdateOrderRequest request
-            ) {
-        return ResponseEntity.ok(orderService.update(orderId,request));
+    ) {
+        return ResponseEntity.ok(orderService.updateOrder(orderId, request));
     }
 
-
+    @PatchMapping("/{orderId}/cancel")
+    public ResponseEntity<DeleteOrderResponse> cancel(
+            @PathVariable Long orderId,
+            @Valid @RequestBody DeleteOrderRequest request
+    ) {
+        return ResponseEntity.ok(orderService.cancelOrder(orderId, request));
+    }
 }
