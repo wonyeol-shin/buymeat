@@ -8,45 +8,47 @@ import com.example.ecommercesystemproject.admin.entity.Status;
 import com.example.ecommercesystemproject.admin.repository.AdminRepository;
 import com.example.ecommercesystemproject.common.ServiceException;
 import jakarta.validation.Valid;
+import com.example.ecommercesystemproject.common.config.PasswordEncoder;
+import com.example.ecommercesystemproject.common.exception.AccountNotActiveException;
+import com.example.ecommercesystemproject.common.exception.DifferentPasswordException;
+import com.example.ecommercesystemproject.common.exception.IsNotSuperAccountException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
 public class AdminService {
-    private final AdminRepository adminRepository;
 
-//    @Transactional(readOnly = true)
-//    public List<GetAllAdminResponse> getAllAdmin(
-//
-//    ) {
-//        return adminRepository.findAll().stream().map(
-//                (admin -> new GetAllAdminResponse(
-//                        admin.getId(),
-//                        admin.getName(),
-//                        admin.getEmail(),
-//                        admin.getStatus(),
-//                        admin.getCreatedAt(),
-//                        admin.getApprovedAt()
-//                ))
-//        ).toList();
-//
-//    }
+    private final AdminRepository adminRepository;
+    private final PasswordEncoder passwordEncoder;
+
 
     // 로그인 한 ID 정보가 유효하지 않는 로그인 ID임
     private Admin findAdminExist(Long sessionAdminId) {
         return adminRepository.findById(sessionAdminId).orElseThrow(
                 () -> new IllegalStateException("로그인 정보가 유효하지 않음")
         );
+    }
+
+    // 로그인 한 ID 정보가 "활성" 상태가 아님
+    private void checkActiveAccount(Status status) {
+        if (status != Status.ACTIVE) {
+            throw new AccountNotActiveException("계정이 활성상태가 아닙니다. 관리자에게 문의하세요");
+        }
+    }
+
+    // 로그인 한 ID 정보가 Root(super) 계정이 아님
+    private void checkSuperAccount(Role role) {
+        if (role != Role.SUPER) {
+            throw new IsNotSuperAccountException("Super 계정만 가능한 작업입니다.");
+        }
     }
 
     // 다건조회 + 쿼리 파라미터로 값을 받아서 정렬 and 필터 + ( 촤소한 관리자들만 이용 가능 )
@@ -56,28 +58,25 @@ public class AdminService {
     ) {
         // 로그인 한 계정이 존재하지 않는 id 일경우 에러, 유효하면 Admin return
         Admin admin = findAdminExist(sessionAdminId);
-        
-        // 로그인 한 계정이 활성 상태 계정이 아닐경우  조회 할 권한이 없음
-        if (admin.getStatus() != Status.ACTIVE  ){
-           throw  new IllegalStateException("조회 할 권한 없음");
-        }
+
+        checkActiveAccount(admin.getStatus());
 
         Specification<Admin> adminSpecification = Specification.where(
-                AdminSpecification.equalName(name))
+                        AdminSpecification.equalName(name))
                 .and(AdminSpecification.equalEmail(email))
                 .and(AdminSpecification.equalRole(role))
                 .and(AdminSpecification.equalStatus(status));
 
-       return adminRepository.findAll(adminSpecification, pageable).map(
-               findedAdmin -> new GetAllAdminResponse(
-                       admin.getId(),
-                       admin.getName(),
-                       admin.getEmail(),
-                       admin.getStatus(),
-                       admin.getCreatedAt(),
-                       admin.getApprovedAt()
-               )
-       );
+        return adminRepository.findAll(adminSpecification, pageable).map(
+                findedAdmin -> new GetAllAdminResponse(
+                        admin.getId(),
+                        admin.getName(),
+                        admin.getEmail(),
+                        admin.getStatus(),
+                        admin.getCreatedAt(),
+                        admin.getApprovedAt()
+                )
+        );
     }
 
     // 단건조회
@@ -88,9 +87,7 @@ public class AdminService {
         Admin admin = findAdminExist(sessionAdminId);
 
         // 로그인 한 계정이 활성 상태 계정이 아닐경우  조회 할 권한이 없음
-        if (admin.getStatus() != Status.ACTIVE  ){
-            throw  new IllegalStateException("조회 할 권한 없음");
-        }
+        checkActiveAccount(admin.getStatus());
 
         // 찾을려는 관리자가 없는 관리자
         Admin findedAdmin = adminRepository.findById(sessionAdminId).orElseThrow(
@@ -116,9 +113,8 @@ public class AdminService {
         Admin admin = findAdminExist(sessionAdminId);
 
         // 로그인 한 계정이 활성 상태 계정이 아니고 Root가 아닐경우 변경 권한 없음
-        if (admin.getStatus() != Status.ACTIVE && admin.getRole() != Role.SUPER ){
-            throw  new IllegalStateException("변경 할 권한 없음");
-        }
+        checkActiveAccount(admin.getStatus());
+        checkSuperAccount(admin.getRole());
 
 
         Admin findedAdmin = adminRepository.findById(adminId).orElseThrow(
@@ -154,9 +150,8 @@ public class AdminService {
         Admin admin = findAdminExist(sessionAdminId);
 
         // 로그인 한 계정이 활성 상태 계정이 아니고 Root가 아닐경우 변경 권한 없음
-        if (admin.getStatus() != Status.ACTIVE && admin.getRole() != Role.SUPER ){
-            throw  new IllegalStateException("변경 할 권한 없음");
-        }
+        checkActiveAccount(admin.getStatus());
+        checkSuperAccount(admin.getRole());
 
 
         Admin findedAdmin = adminRepository.findById(adminId).orElseThrow(
@@ -181,10 +176,8 @@ public class AdminService {
         Admin admin = findAdminExist(sessionAdminId);
 
         // 로그인 한 계정이 활성 상태 계정이 아니고 Root가 아닐경우 변경 권한 없음
-        if (admin.getStatus() != Status.ACTIVE && admin.getRole() != Role.SUPER ){
-            throw  new IllegalStateException("변경 할 권한 없음");
-        }
-
+        checkActiveAccount(admin.getStatus());
+        checkSuperAccount(admin.getRole());
 
         Admin findedAdmin = adminRepository.findById(adminId).orElseThrow(
                 () -> new IllegalStateException("없는 유저")
@@ -206,19 +199,16 @@ public class AdminService {
         Admin admin = findAdminExist(sessionAdminId);
 
         // 로그인 한 계정이 활성 상태 계정이 아님
-        if (admin.getStatus() != Status.ACTIVE) {
-            throw new IllegalStateException("변경 할 권한 없음");
-        }
-
-        if (!request.getNewPassword().equals(request.getCheckPassword())) {
-            throw new IllegalStateException("변경 할 패스워드와 검증 패스워드가 다릅니다.");
-        }
+        checkActiveAccount(admin.getStatus());
 
         if (!admin.getPassword().equals(request.getOldPassword())) {
-            throw new IllegalStateException("패스워드 틀림");
+            throw new DifferentPasswordException("현재 패스워드와 입력한 패스워드가 일치하지 않습니다.");
         }
 
-        admin.updatePassword(request.getNewPassword());
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(request.getNewPassword());
+
+        admin.updatePassword(encodedPassword);
     }
 
     // 로그인 한 관리자 자신의 정보를 변경
@@ -229,14 +219,10 @@ public class AdminService {
         Admin admin = findAdminExist(sessionAdminId);
 
         // 로그인 한 계정이 활성 상태 계정이 아님
-        if (admin.getStatus() != Status.ACTIVE) {
-            throw new IllegalStateException("변경 할 권한 없음");
-        }
+        checkActiveAccount(admin.getStatus());
 
         admin.updateProfile(request.getName(), request.getEmail(), request.getPhone());
 
     }
-
-
 
 }
