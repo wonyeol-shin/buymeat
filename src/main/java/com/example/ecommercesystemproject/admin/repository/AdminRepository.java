@@ -9,7 +9,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
-// 동적 메서드를 위해 JpaSpecificationExecutor 상속
 public interface AdminRepository extends JpaRepository<Admin, Long>, JpaSpecificationExecutor<Admin> {
+
+    // AuthService에서 사용
+    boolean existsByEmail(String email);
+
+    boolean existsByPhone(String phone);
+
+    Optional<Admin> findByEmail(String email);
+
 }

@@ -4,11 +4,13 @@ import com.example.ecommercesystemproject.customer.dto.*;
 import com.example.ecommercesystemproject.customer.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +25,15 @@ public class CustomerController {
             @Valid @RequestBody CreateCustomerRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(customerService.createCustomer(request));
+    }
+
+    // 고객 전체 조회(+ 조건 검색)
+    @GetMapping
+    public ResponseEntity<Page<GetCustomerResponse>> getAll(
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            CustomerSearchCondition condition
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(customerService.getAllCustomer(pageable, condition));
     }
 
     // 고객 단건 조회
@@ -40,6 +51,24 @@ public class CustomerController {
             @RequestBody UpdateCustomerRequest request
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(customerService.updateCustomer(customerId, request));
+    }
+
+    // 고객 상태 변경
+    @PatchMapping("/{customerId}/status")
+    public ResponseEntity<UpdateCustomerStatusResponse> updateCustomerStatus(
+            @PathVariable Long customerId,
+            @Valid @RequestBody UpdateCustomerStatusRequest request
+            ) {
+        return ResponseEntity.status(HttpStatus.OK).body(customerService.updateCustomerStatus(customerId, request));
+    }
+
+    // 고객 삭제
+    @DeleteMapping("/{customerId}")
+    public ResponseEntity<Void> deleteCustomer(
+            @PathVariable Long customerId
+    ) {
+        customerService.deleteCustomer(customerId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }
