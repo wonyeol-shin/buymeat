@@ -61,6 +61,12 @@ public class Order extends BaseEntity {
     }
 
     public void cancel(String cancellationReason) {
+        if (this.status != OrderStatus.PREPARING) {
+            throw new IllegalStateException(
+                    "준비중 상태의 주문만 취소할 수 있습니다."
+            );
+        }
+
         this.status = OrderStatus.CANCELED;
         this.cancellationReason = cancellationReason;
     }
