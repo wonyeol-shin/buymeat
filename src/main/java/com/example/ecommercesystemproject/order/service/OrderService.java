@@ -14,6 +14,8 @@ import com.example.ecommercesystemproject.order.util.OrderNumberGenerator;
 import com.example.ecommercesystemproject.product.entity.Product;
 import com.example.ecommercesystemproject.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,12 +54,10 @@ public class OrderService {
         return toResponse(savedOrder);
     }
 
-
-    public List<OrderResponse> getAllOrder() {
-        return orderRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<OrderResponse> getAllOrder(Pageable pageable, OrderSearchCondition condition) {
+        Page<Order> orders = orderRepository.findByKeywordAndStatus(condition.getKeyword(), condition.getStatus(), pageable);
+        return orders.map(this::toResponse);
     }
 
     public OrderResponse getOneOrder(Long orderId) {
