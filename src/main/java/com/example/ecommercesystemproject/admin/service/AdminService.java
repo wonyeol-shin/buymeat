@@ -50,7 +50,7 @@ public class AdminService {
     // 다건조회 + 쿼리 파라미터로 값을 받아서 정렬 and 필터 + ( 촤소한 관리자들만 이용 가능 )
     @Transactional(readOnly = true)
     public Page<GetAllAdminResponse> getAdminDynamic(
-            int page, int size, String name, String email, Role role, Status status, boolean active, Long sessionAdminId
+            Pageable pageable, String name, String email, Role role, Status status, Long sessionAdminId
     ) {
         // 로그인 한 계정이 존재하지 않는 id 일경우 에러, 유효하면 Admin return
         Admin admin = findAdminExist(sessionAdminId);
@@ -59,11 +59,6 @@ public class AdminService {
         if (admin.getStatus() != Status.ACTIVE  ){
            throw  new IllegalStateException("조회 할 권한 없음");
         }
-
-        // 수정일자의 기본값 true, false가 들어올 경우 정렬하지 않음
-        Pageable pageable = !active
-                ? PageRequest.of(page,size)
-                : PageRequest.of(page,size, Sort.by("modifiedAt").descending());
 
         Specification<Admin> adminSpecification = Specification.where(
                 AdminSpecification.equalName(name))

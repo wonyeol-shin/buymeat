@@ -7,6 +7,9 @@ import com.example.ecommercesystemproject.admin.service.AdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,17 +24,19 @@ public class AdminController {
     // 다건 조회 + 조건 조회, (최소 관리자 이상만 조회 가능) AdminSession은 Auth에서 추가 후 교체 필요
     @GetMapping("")
     public ResponseEntity<Page<GetAllAdminResponse>> getAll(
-            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+            @PageableDefault(
+                    size = 10,
+                    sort = "modifiedAt",
+                    direction = Sort.Direction.DESC
+            ) Pageable pageable,
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "role", required = false) Role role,
             @RequestParam(value = "status", required = false) Status status,
-            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
             @SessionAttribute(name = "adminLogin", required = false) AdminSession adminSession
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(adminService.getAdminDynamic(
-                page, size, name, email, role, status, active, adminSession.getId()
+                pageable, name, email, role, status, adminSession.getId()
         ));
     }
 
