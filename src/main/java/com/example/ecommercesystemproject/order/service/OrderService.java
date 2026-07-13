@@ -3,6 +3,8 @@ package com.example.ecommercesystemproject.order.service;
 import com.example.ecommercesystemproject.admin.entity.Admin;
 import com.example.ecommercesystemproject.admin.entity.Role;
 import com.example.ecommercesystemproject.admin.repository.AdminRepository;
+import com.example.ecommercesystemproject.common.exception.ForbiddenException;
+import com.example.ecommercesystemproject.common.exception.NotFoundException;
 import com.example.ecommercesystemproject.customer.entity.Customer;
 import com.example.ecommercesystemproject.customer.repository.CustomerRepository;
 import com.example.ecommercesystemproject.order.dto.*;
@@ -28,16 +30,12 @@ public class OrderService {
 
     @Transactional
     public OrderResponse create(CreateOrderRequest request, Long adminId) {
-        Product product = productRepository.findById(request.getProductId()).orElseThrow(
-                () -> new IllegalStateException("없는 상품입니다.")
-        );
-        Customer customer = customerRepository.findById(request.getCustomerId()).orElseThrow(
-                () -> new IllegalStateException("없는 고객입니다.")
-        );
+        Product product = getProductOrThrow(request);
+        Customer customer = getCustomerOrThrow(request);
         Admin admin = getAdminOrThrow(adminId);
 
         if (admin.getRole() != Role.SUPER && admin.getRole() != Role.CS) {
-            throw new IllegalStateException("주문 생성 권한이 없습니다.");
+            throw new ForbiddenException("주문 생성 권한이 없습니다.");
         }
 
         long totalPrice = product.getPrice() * request.getQuantity();
@@ -54,11 +52,6 @@ public class OrderService {
         return toResponse(savedOrder);
     }
 
-    private Admin getAdminOrThrow(Long adminId) {
-        return adminRepository.findById(adminId).orElseThrow(
-                () -> new IllegalStateException("없는 관리자입니다.")
-        );
-    }
 
     public List<OrderResponse> getAllOrder() {
         return orderRepository.findAll()
@@ -80,7 +73,7 @@ public class OrderService {
         Admin admin = getAdminOrThrow(adminId);
 
         if (admin.getRole() != Role.SUPER && admin.getRole() != Role.OP) {
-            throw new IllegalStateException("주문 상태 변경 권한이 없습니다.");
+            throw new ForbiddenException("주문 상태 변경 권한이 없습니다.");
         }
 
         Order order = getOrderOrThrow(orderId);
@@ -95,7 +88,7 @@ public class OrderService {
         Admin admin = getAdminOrThrow(adminId);
 
         if (admin.getRole() != Role.SUPER && admin.getRole() != Role.CS) {
-            throw new IllegalStateException("주문 취소 권한이 없습니다.");
+            throw new ForbiddenException("주문 취소 권한이 없습니다.");
         }
 
         Order order = getOrderOrThrow(orderId);
@@ -134,7 +127,25 @@ public class OrderService {
 
     private Order getOrderOrThrow(Long orderId) {
         return orderRepository.findById(orderId).orElseThrow(
-                () -> new IllegalStateException("없는 주문입니다.")
+                () -> new NotFoundException("없는 주문입니다.")
+        );
+    }
+
+    private Product getProductOrThrow(CreateOrderRequest request) {
+        return productRepository.findById(request.getProductId()).orElseThrow(
+                () -> new NotFoundException("없는 상품입니다.")
+        );
+    }
+
+    private Customer getCustomerOrThrow(CreateOrderRequest request) {
+        return customerRepository.findById(request.getCustomerId()).orElseThrow(
+                () -> new NotFoundException("없는 고객입니다.")
+        );
+    }
+
+    private Admin getAdminOrThrow(Long adminId) {
+        return adminRepository.findById(adminId).orElseThrow(
+                () -> new NotFoundException("없는 관리자입니다.")
         );
     }
 }

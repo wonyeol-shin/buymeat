@@ -2,6 +2,8 @@ package com.example.ecommercesystemproject.order.entity;
 
 import com.example.ecommercesystemproject.admin.entity.Admin;
 import com.example.ecommercesystemproject.common.BaseEntity;
+import com.example.ecommercesystemproject.common.exception.BadRequestException;
+import com.example.ecommercesystemproject.common.exception.ConflictException;
 import com.example.ecommercesystemproject.customer.entity.Customer;
 import com.example.ecommercesystemproject.product.entity.Product;
 import jakarta.persistence.*;
@@ -54,7 +56,7 @@ public class Order extends BaseEntity {
                  long totalPrice
     ) {
         if (quantity < 1) {
-            throw new IllegalArgumentException("주문 수량은 1개 이상이어야 합니다.");
+            throw new BadRequestException("주문 수량은 1개 이상이어야 합니다.");
         }
         this.status = OrderStatus.PREPARING;
         this.quantity = quantity;
@@ -69,7 +71,7 @@ public class Order extends BaseEntity {
         OrderStatus nextStatus = this.status.next();
 
         if (nextStatus != newStatus) {
-            throw new IllegalStateException(
+            throw new ConflictException(
                     "주문 상태는 준비중 → 배송중 → 배송완료 순서로만 변경할 수 있습니다."
             );
         }
@@ -79,7 +81,7 @@ public class Order extends BaseEntity {
 
     public void cancel(String cancellationReason) {
         if (this.status != OrderStatus.PREPARING) {
-            throw new IllegalStateException(
+            throw new ConflictException(
                     "준비중 상태의 주문만 취소할 수 있습니다."
             );
         }
