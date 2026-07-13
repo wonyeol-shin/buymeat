@@ -24,7 +24,7 @@ public class OrderController {
             HttpSession session
     ) {
         Long adminId = (Long) session.getAttribute(SessionConst.LOGIN_ADMIN_ID);
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(request,adminId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(request, adminId));
     }
 
     @GetMapping
@@ -38,18 +38,22 @@ public class OrderController {
     }
 
     @PatchMapping("/{orderId}/status")
-    public ResponseEntity<OrderResponse> update(
+    public ResponseEntity<OrderResponse> updateStatus(
             @PathVariable Long orderId,
-            @Valid @RequestBody UpdateOrderRequest request
+            @Valid @RequestBody UpdateOrderRequest request,
+            HttpSession session
     ) {
-        return ResponseEntity.ok(orderService.updateOrder(orderId, request));
+        Long adminId = (Long) session.getAttribute(SessionConst.LOGIN_ADMIN_ID);
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, request, adminId));
     }
 
     @PatchMapping("/{orderId}/cancel")
     public ResponseEntity<OrderResponse> cancel(
             @PathVariable Long orderId,
-            @Valid @RequestBody DeleteOrderRequest request
+            @Valid @RequestBody CancelOrderRequest request,
+            HttpSession session
     ) {
-        return ResponseEntity.ok(orderService.cancelOrder(orderId, request));
+        Long adminId = (Long) session.getAttribute(SessionConst.LOGIN_ADMIN_ID);
+        return ResponseEntity.ok(orderService.cancelOrder(orderId, request, adminId));
     }
 }

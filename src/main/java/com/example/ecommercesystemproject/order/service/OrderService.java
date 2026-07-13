@@ -34,9 +34,12 @@ public class OrderService {
         Customer customer = customerRepository.findById(request.getCustomerId()).orElseThrow(
                 () -> new IllegalStateException("없는 고객입니다.")
         );
-        Admin admin = adminRepository.findById(adminId).orElseThrow(
-                () -> new IllegalStateException("없는 관리자입니다.")
-        );
+        Admin admin = getAdminOrThrow(adminId);
+
+        if (admin.getRole() != Role.SUPER && admin.getRole() != Role.CS) {
+            throw new IllegalStateException("주문 생성 권한이 없습니다.");
+        }
+
         long totalPrice = product.getPrice() * request.getQuantity();
 
         Order order = new Order(
@@ -49,6 +52,12 @@ public class OrderService {
         );
         Order savedOrder = orderRepository.save(order);
         return toResponse(savedOrder);
+    }
+
+    private Admin getAdminOrThrow(Long adminId) {
+        return adminRepository.findById(adminId).orElseThrow(
+                () -> new IllegalStateException("없는 관리자입니다.")
+        );
     }
 
     public List<OrderResponse> getAllOrder() {
@@ -66,7 +75,14 @@ public class OrderService {
 
 
     @Transactional
-    public OrderResponse updateOrder(Long orderId, UpdateOrderRequest request) {
+    public OrderResponse updateOrderStatus(Long orderId, UpdateOrderRequest request, Long adminId) {
+
+        Admin admin = getAdminOrThrow(adminId);
+
+        if (admin.getRole() != Role.SUPER && admin.getRole() != Role.OP) {
+            throw new IllegalStateException("주문 상태 변경 권한이 없습니다.");
+        }
+
         Order order = getOrderOrThrow(orderId);
 
         order.updateStatus(request.getStatus());
@@ -75,7 +91,13 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse cancelOrder(Long orderId, DeleteOrderRequest request) {
+    public OrderResponse cancelOrder(Long orderId, CancelOrderRequest request, Long adminId) {
+        Admin admin = getAdminOrThrow(adminId);
+
+        if (admin.getRole() != Role.SUPER && admin.getRole() != Role.CS) {
+            throw new IllegalStateException("주문 취소 권한이 없습니다.");
+        }
+
         Order order = getOrderOrThrow(orderId);
         order.cancel(request.getCancellationReason());
         return toResponse(order);
