@@ -77,7 +77,7 @@ public class ProductService {
         checkLogin(adminId);
         Product product = checkKey(id);
 
-        product.editStatus(String.valueOf(request.getStatus()));
+        product.editStatus(request.getStatus());
         return new UpdateProductStatusResponse(product.getId(), product.getStatus());
     }
 

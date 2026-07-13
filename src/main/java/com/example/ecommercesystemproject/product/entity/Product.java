@@ -57,7 +57,7 @@ public class Product extends BaseEntity {
     }
 
     // 상태 수정
-    public void editStatus(String a) {
-        this.status = a;
+    public void editStatus(ProductStatus s) {
+        this.status = s;
     }
 }
