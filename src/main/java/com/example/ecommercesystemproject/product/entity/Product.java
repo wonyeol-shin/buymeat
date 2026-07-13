@@ -71,3 +71,4 @@ public class Product extends BaseEntity {
         this.status = a;
     }
 }
+// 브랜치 rebase 후 다시 푸쉬
