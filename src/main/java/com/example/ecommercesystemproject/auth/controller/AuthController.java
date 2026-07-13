@@ -43,7 +43,7 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.of(HttpStatus.OK.value(), "로그인 성공", response));
     }
 
-    @PostMapping("/logout")
+    @PostMapping("/api/logout") // 요청으로인한 변경 "/logout" -> "/api/logout"
     public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest httpRequest) {
         authService.logout(httpRequest);
 

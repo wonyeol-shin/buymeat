@@ -1,7 +1,12 @@
 package com.example.ecommercesystemproject.common.exception;
 
-public class DuplicatePhoneException extends RuntimeException {
+// RuntimeException -> ServiceException 상속으로 변경
+
+import com.example.ecommercesystemproject.common.ServiceException;
+import org.springframework.http.HttpStatus;
+
+public class DuplicatePhoneException extends ServiceException {
     public DuplicatePhoneException(String message) {
-        super(message);
+        super(message, HttpStatus.CONFLICT);
     }
 }
