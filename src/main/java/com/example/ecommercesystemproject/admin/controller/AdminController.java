@@ -4,34 +4,36 @@ import com.example.ecommercesystemproject.admin.dto.*;
 import com.example.ecommercesystemproject.admin.entity.Role;
 import com.example.ecommercesystemproject.admin.entity.Status;
 import com.example.ecommercesystemproject.admin.service.AdminService;
+import com.example.ecommercesystemproject.common.exception.DifferentPasswordException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RequestMapping("/api/admins")
 @RequiredArgsConstructor
 public class AdminController {
     private final AdminService adminService;
 
+
     // 다건 조회 + 조건 조회, (최소 관리자 이상만 조회 가능) AdminSession은 Auth에서 추가 후 교체 필요
     @GetMapping("")
     public ResponseEntity<Page<GetAllAdminResponse>> getAll(
-            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "role", required = false) Role role,
             @RequestParam(value = "status", required = false) Status status,
-            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active,
             @SessionAttribute(name = "adminLogin", required = false) AdminSession adminSession
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(adminService.getAdminDynamic(
-                page, size, name, email, role, status, active, adminSession.getId()
+               name, email, role, status,  adminSession.getId()
         ));
     }
 
@@ -83,6 +85,11 @@ public class AdminController {
             @Valid @RequestBody UpdateMyPasswordRequest request,
             @SessionAttribute(name = "adminLogin", required = false) AdminSession adminSession
     ) {
+        // 컨트롤러에서 패스워드 유요값 검증
+        if (request.isDifferentPassword()) {
+            throw new DifferentPasswordException("입력한 패스워드와 검증 패스워드 값이 다릅니다.");
+        }
+
 
         adminService.updateMyPassword(request, adminSession.getId());
         return ResponseEntity.status(HttpStatus.OK).build();
