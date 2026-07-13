@@ -1,11 +1,13 @@
 package com.example.ecommercesystemproject.order.entity;
 
+import com.example.ecommercesystemproject.admin.entity.Admin;
 import com.example.ecommercesystemproject.common.BaseEntity;
+import com.example.ecommercesystemproject.customer.entity.Customer;
+import com.example.ecommercesystemproject.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 
 @Getter
 @Entity
@@ -27,27 +29,30 @@ public class Order extends BaseEntity {
     @Column(nullable = false, unique = true, length = 50)
     private String orderNumber;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "admin_id")
-//    private Admin admin;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admin_id")
+    private Admin admin;
 
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "product_id", nullable = false)
-//    private Product product;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "customer_id", nullable = false)
-//    private Customer customer;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 
     @Column(nullable = false)
     private long totalPrice;
 
     private String cancellationReason;
 
-    public Order(int quantity, String orderNumber, long totalPrice) {
+    public Order(int quantity, String orderNumber, Admin admin, Product product, Customer customer, long totalPrice) {
         this.status = OrderStatus.PREPARING;
         this.quantity = quantity;
         this.orderNumber = orderNumber;
+        this.admin = admin;
+        this.product = product;
+        this.customer = customer;
         this.totalPrice = totalPrice;
     }
 
