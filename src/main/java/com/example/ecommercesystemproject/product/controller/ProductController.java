@@ -50,7 +50,7 @@ public class ProductController {
     @GetMapping("/{productId}")
     public ResponseEntity<ApiResponse<GetProductResponse>> getOne(
             @PathVariable Long productId,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) Long sessionAdminId
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
     ) {
         GetProductResponse response = productService.getOneProduct(productId, sessionAdminId);
 
