@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
+
 public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("""
     SELECT o FROM Order o WHERE
@@ -29,4 +31,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     WHERE o.customer.id = :customerId
     """)
     Long sumTotalPriceByCustomerId(@Param("customerId") Long customerId);
+
+    // 상태별 주문 개수
+    Long countByStatus(OrderStatus status);
+
+    @Query("""
+        SELECT SUM(o.totalPrice)  FROM Order o\s
+        WHERE ( o.modifiedAt > :datetime ) \s
+""")
+    Long sumTotalPriceToday(LocalDateTime datetime);
 }
