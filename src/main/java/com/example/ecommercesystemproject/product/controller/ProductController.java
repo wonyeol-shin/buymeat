@@ -14,11 +14,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
 
-    @PostMapping("/api/products")
+    @PostMapping
     public ResponseEntity<ApiResponse<CreateProductResponse>> create(
             @Valid @RequestBody CreateProductRequest request,
             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
@@ -32,7 +33,7 @@ public class ProductController {
         ); // 201
     }
 
-    @GetMapping("/api/products")
+    @GetMapping
     public ResponseEntity<ApiResponse<List<GetProductsResponse>>> getAll(
             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
     ) {
@@ -46,7 +47,7 @@ public class ProductController {
         ); // 200
     }
 
-    @GetMapping("/api/products/{productId}")
+    @GetMapping("/{productId}")
     public ResponseEntity<ApiResponse<GetProductResponse>> getOne(
             @PathVariable Long productId,
             @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) Long sessionAdminId
@@ -62,7 +63,7 @@ public class ProductController {
         );
     }
 
-    @PutMapping("/api/products/{productId}")
+    @PutMapping("/{productId}")
     public ResponseEntity<ApiResponse<UpdateProductResponse>> update(
             @PathVariable Long productId,
             @Valid @RequestBody UpdateProductRequest request,
@@ -79,7 +80,7 @@ public class ProductController {
         );
     }
 
-    @PatchMapping("/api/products/{productId}/stock")
+    @PatchMapping("/{productId}/stock")
     public ResponseEntity<ApiResponse<UpdateProductStockResponse>> updateStock(
             @PathVariable Long productId,
             @Valid @RequestBody UpdateProductStockRequest request,
@@ -96,7 +97,7 @@ public class ProductController {
         );
     }
 
-    @PatchMapping("/api/products/{productId}/status")
+    @PatchMapping("/{productId}/status")
     public ResponseEntity<ApiResponse<UpdateProductStatusResponse>> updateStatus(
             @PathVariable Long productId, @Valid @RequestBody UpdateProductStatusRequest request,
             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
@@ -112,7 +113,7 @@ public class ProductController {
         );
     }
 
-    @DeleteMapping("/api/products/{productId}")
+    @DeleteMapping("/{productId}")
     public ResponseEntity<Void> delete(
             @PathVariable Long productId,
             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
