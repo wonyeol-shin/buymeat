@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 // 상품 리스트 조회
 public record GetProductsResponse
-        (Long id, String adminName, String product_name, String category, Long price,
+        (Long id, String adminName, String productName, String category, Long price,
          Integer stock, ProductStatus status, LocalDateTime createdAt) {
 
     public static GetProductsResponse from(Product p) {

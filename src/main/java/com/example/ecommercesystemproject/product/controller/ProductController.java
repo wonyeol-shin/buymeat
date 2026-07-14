@@ -6,6 +6,10 @@ import com.example.ecommercesystemproject.product.dto.*;
 import com.example.ecommercesystemproject.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,12 +30,16 @@ public class ProductController {
                 .body(productService.createProduct(request, longAdminId)); // 201
     }
 
+    // 전체 조회 + 페이징, 검색 기능
     @GetMapping("/api/products")
-    public ResponseEntity<List<GetProductsResponse>> getAll
-            (@SessionAttribute(name = "loginAdmin", required = false) AdminSession loginAdmin) {
+    public ResponseEntity<Page<GetProductsResponse>> getAll
+            (@SessionAttribute(name = "loginAdmin", required = false) AdminSession loginAdmin,
+             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+             ProductSearchCondition condition
+            ) {
 
         Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
-        return ResponseEntity.ok(productService.getAllProducts(longAdminId)); // 200
+        return ResponseEntity.ok(productService.getAllProducts(longAdminId, pageable, condition)); // 200
     }
 
     @GetMapping("/api/products/{productId}")
