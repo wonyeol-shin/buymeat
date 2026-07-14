@@ -46,13 +46,13 @@ public class AuthService {
         Admin admin = new Admin(
                 request.getName(),
                 request.getEmail(),
-                request.getPassword(),
+                encodedPassword, // 암호화된 비밀번호로 써야지
                 request.getPhone(),
                 request.getRole(),
                 request.getWhyAdminReason()
         );
         // 실제 DB에 저장
-        Admin savedAdmin = adminRepository.save(admin);
+        Admin savedAdmin = adminRepository.save(admin); // JpaRepository에서 알아서 save 구현체를 만들어 줌.
 
         return new SignupResponse(savedAdmin);
     }
