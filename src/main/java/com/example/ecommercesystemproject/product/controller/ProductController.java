@@ -5,6 +5,7 @@ import com.example.ecommercesystemproject.common.constant.SessionConst;
 import com.example.ecommercesystemproject.common.response.ApiResponse;
 import com.example.ecommercesystemproject.product.dto.*;
 import com.example.ecommercesystemproject.product.service.ProductService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -20,10 +21,11 @@ public class ProductController {
     @PostMapping("/api/products")
     public ResponseEntity<ApiResponse<CreateProductResponse>> create
             (@Valid @RequestBody CreateProductRequest request,
-             @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) AdminSession loginAdmin) {
+             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+            ) {
 
-        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
-        CreateProductResponse response = productService.createProduct(request, longAdminId);
+     
+        CreateProductResponse response = productService.createProduct(request, sessionAdminId);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse.of(
                         HttpStatus.CREATED.value(),
@@ -34,10 +36,11 @@ public class ProductController {
 
     @GetMapping("/api/products")
     public ResponseEntity<ApiResponse<List<GetProductsResponse>>> getAll
-            (@SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) AdminSession loginAdmin) {
+            (@Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+            ) {
 
-        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
-        List<GetProductsResponse> responses = productService.getAllProducts(longAdminId);
+       
+        List<GetProductsResponse> responses = productService.getAllProducts(sessionAdminId);
         return ResponseEntity.ok(
                 ApiResponse.of(
                         HttpStatus.OK.value(),
@@ -52,8 +55,8 @@ public class ProductController {
             (@PathVariable Long productId,
              @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) AdminSession loginAdmin) {
 
-        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
-        GetProductResponse response = productService.getOneProduct(productId, longAdminId);
+       
+        GetProductResponse response = productService.getOneProduct(productId, sessionAdminId);
 
         return ResponseEntity.ok(
                 ApiResponse.of(
@@ -67,10 +70,11 @@ public class ProductController {
     @PutMapping("/api/products/{productId}")
     public ResponseEntity<ApiResponse<UpdateProductResponse>> update
             (@PathVariable Long productId, @Valid @RequestBody UpdateProductRequest request,
-             @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) AdminSession loginAdmin) {
+             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+            ) {
 
-        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
-        UpdateProductResponse response = productService.updateProduct(productId, request, longAdminId);
+     
+        UpdateProductResponse response = productService.updateProduct(productId, request, sessionAdminId);
 
         return ResponseEntity.ok(
                 ApiResponse.of(
@@ -84,10 +88,11 @@ public class ProductController {
     @PatchMapping("/api/products/{productId}/stock")
     public ResponseEntity<ApiResponse<UpdateProductStockResponse>> updateStock
             (@PathVariable Long productId, @Valid @RequestBody UpdateProductStockRequest request,
-             @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) AdminSession loginAdmin) {
+             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+            ) {
 
-        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
-        UpdateProductStockResponse response = productService.updateProductStock(productId, request, longAdminId);
+        
+        UpdateProductStockResponse response = productService.updateProductStock(productId, request, sessionAdminId);
 
         return ResponseEntity.ok(
                 ApiResponse.of(
@@ -101,10 +106,11 @@ public class ProductController {
     @PatchMapping("/api/products/{productId}/status")
     public ResponseEntity<ApiResponse<UpdateProductStatusResponse>> updateStatus
             (@PathVariable Long productId, @Valid @RequestBody UpdateProductStatusRequest request,
-             @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) AdminSession loginAdmin) {
+             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+            ) {
 
-        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
-        UpdateProductStatusResponse response = productService.updateProductStatus(productId, request, longAdminId);
+       
+        UpdateProductStatusResponse response = productService.updateProductStatus(productId, request, sessionAdminId);
 
         return ResponseEntity.ok(
                 ApiResponse.of(
@@ -118,10 +124,10 @@ public class ProductController {
     @DeleteMapping("/api/products/{productId}")
     public ResponseEntity<Void> delete
             (@PathVariable Long productId,
-             @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) AdminSession loginAdmin) {
+             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+            ) {
 
-        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
-        productService.deleteProduct(productId, longAdminId);
+        productService.deleteProduct(productId, sessionAdminId);
         return ResponseEntity.noContent().build(); // 204
     }
 }

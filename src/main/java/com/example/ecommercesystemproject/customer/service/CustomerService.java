@@ -5,6 +5,7 @@ import com.example.ecommercesystemproject.customer.dto.*;
 import com.example.ecommercesystemproject.customer.entity.Customer;
 import com.example.ecommercesystemproject.customer.enums.CustomerStatus;
 import com.example.ecommercesystemproject.customer.repository.CustomerRepository;
+import com.example.ecommercesystemproject.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import java.util.List;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final OrderRepository orderRepository;
 
     // 고객 생성
     @Transactional
@@ -36,23 +38,13 @@ public class CustomerService {
     // 고객 전체 조회
     @Transactional(readOnly = true)
     public Page<GetCustomerResponse> getAllCustomer(Pageable pageable, CustomerSearchCondition condition) {
-
-        Page<Customer> customers;
-
-        if (condition.getStatus() != null && condition.getKeyword() == null) {
-            customers = customerRepository.findByStatus(condition.getStatus(), pageable);
-        } else if (condition.getStatus() == null && condition.getKeyword() != null) {
-           customers = customerRepository.findByNameContainingOrEmailContaining(condition.getKeyword(), condition.getKeyword(), pageable);
-        } else if (condition.getStatus() != null && condition.getKeyword() != null) {
-            customers = customerRepository.searchByKeywordAndStatus(condition.getKeyword(), condition.getStatus(), pageable);
-        } else {
-            customers = customerRepository.findAll(pageable);
-        }
+        Page<Customer> customers = customerRepository.searchByKeywordAndStatus(condition.getKeyword(), condition.getStatus(), pageable);
         return customers.map(customer -> new GetCustomerResponse(
                         customer.getId(), customer.getName(),
                         customer.getEmail(), customer.getPhone(),
-                        customer.getStatus(), customer.getCreatedAt(),
-                        customer.getModifiedAt()
+                        customer.getStatus(), orderRepository.countByCustomerId(customer.getId()),
+                        orderRepository.sumTotalPriceByCustomerId(customer.getId()),
+                        customer.getCreatedAt(), customer.getModifiedAt()
                 ));
     }
 
@@ -60,9 +52,11 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public GetCustomerResponse getOneCustomer(Long customerId) {
         Customer customer = getOrThrow(customerId);
+        Long orderCount = orderRepository.countByCustomerId(customerId);
+        Long totalPrice = orderRepository.sumTotalPriceByCustomerId(customerId);
         return new GetCustomerResponse(
                 customer.getId(), customer.getName(), customer.getEmail(),
-                customer.getPhone(), customer.getStatus(),
+                customer.getPhone(), customer.getStatus(), orderCount, totalPrice,
                 customer.getCreatedAt(), customer.getModifiedAt()
         );
     }
@@ -102,7 +96,5 @@ public class CustomerService {
                 )
         );
     }
-
-
 
 }
