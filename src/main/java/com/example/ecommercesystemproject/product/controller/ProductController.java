@@ -8,6 +8,10 @@ import com.example.ecommercesystemproject.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,20 +38,16 @@ public class ProductController {
         ); // 201
     }
 
+    // 전체 조회 + 페이징, 검색 기능
     @GetMapping("/api/products")
-    public ResponseEntity<ApiResponse<List<GetProductsResponse>>> getAll
-            (@Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+    public ResponseEntity<Page<GetProductsResponse>> getAll
+            (@SessionAttribute(name = "loginAdmin", required = false) AdminSession loginAdmin,
+             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+             ProductSearchCondition condition
             ) {
 
-       
-        List<GetProductsResponse> responses = productService.getAllProducts(sessionAdminId);
-        return ResponseEntity.ok(
-                ApiResponse.of(
-                        HttpStatus.OK.value(),
-                        "상품 목록 조회 성공",
-                        responses
-                )
-        ); // 200
+        Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
+        return ResponseEntity.ok(productService.getAllProducts(longAdminId, pageable, condition)); // 200
     }
 
     @GetMapping("/api/products/{productId}")

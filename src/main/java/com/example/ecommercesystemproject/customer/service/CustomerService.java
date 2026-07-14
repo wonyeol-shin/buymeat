@@ -35,7 +35,7 @@ public class CustomerService {
         );
     }
 
-    // 고객 전체 조회
+    // 고객 전체 조회 + 각 고객 주문수량, 총주문금액
     @Transactional(readOnly = true)
     public Page<GetCustomerResponse> getAllCustomer(Pageable pageable, CustomerSearchCondition condition) {
         Page<Customer> customers = customerRepository.searchByKeywordAndStatus(condition.getKeyword(), condition.getStatus(), pageable);
@@ -48,7 +48,7 @@ public class CustomerService {
                 ));
     }
 
-    // 고객 단건 조회
+    // 고객 단건 조회 + 해당 고객 주문수량, 총 주문금액
     @Transactional(readOnly = true)
     public GetCustomerResponse getOneCustomer(Long customerId) {
         Customer customer = getOrThrow(customerId);
@@ -80,11 +80,11 @@ public class CustomerService {
         return new UpdateCustomerStatusResponse(customer.getId(), customer.getStatus());
     }
 
-    // 고객 삭제(회원탈퇴)
+    // 고객 삭제(회원탈퇴) - 비활성으로 상태 변경
     @Transactional
     public void deleteCustomer(Long customerId) {
         Customer customer = getOrThrow(customerId);
-        customerRepository.delete(customer);
+        customer.inactiveCustomerStatus();
     }
 
     // customer 내부 공통 메서드
