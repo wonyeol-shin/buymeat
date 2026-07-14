@@ -19,4 +19,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             @Param("status")OrderStatus status,
             Pageable pageable
             );
+
+    // 고객의 주문수량 가져오기
+    long countByCustomerId(Long customerId);
+
+    // 고객의 총주문금액 가져오기
+    @Query("""
+    SELECT COALESCE(SUM(o.totalPrice), 0) FROM Order o 
+    WHERE o.customer.id = :customerId
+    """)
+    Long sumTotalPriceByCustomerId(@Param("customerId") Long customerId);
 }

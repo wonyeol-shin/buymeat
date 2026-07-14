@@ -13,15 +13,19 @@ public class GetCustomerResponse {
     private final String email;
     private final String phone;
     private final CustomerStatus status;
+    private final Long orderCount;
+    private final Long totalPrice;
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
 
-    public GetCustomerResponse(Long id, String name, String email, String phone, CustomerStatus status, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+    public GetCustomerResponse(Long id, String name, String email, String phone, CustomerStatus status, Long orderCount, Long totalPrice, LocalDateTime createdAt, LocalDateTime modifiedAt) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.status = status;
+        this.orderCount = orderCount;
+        this.totalPrice = totalPrice;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
     }
