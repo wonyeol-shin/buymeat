@@ -5,8 +5,8 @@ import com.example.ecommercesystemproject.admin.entity.Role;
 import com.example.ecommercesystemproject.admin.entity.Status;
 import com.example.ecommercesystemproject.admin.service.AdminService;
 import com.example.ecommercesystemproject.common.constant.SessionConst;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import com.example.ecommercesystemproject.common.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 import com.example.ecommercesystemproject.common.exception.DifferentPasswordException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +27,8 @@ public class AdminController {
 
 
     // 다건 조회 + 조건 조회, (최소 관리자 이상만 조회 가능) AdminSession은 Auth에서 추가 후 교체 필요
-    @GetMapping("")
-    public ResponseEntity<Page<GetAllAdminResponse>> getAll(
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<GetAllAdminResponse>>> getAll(
             @PageableDefault(
                     size = 10,
                     sort = "modifiedAt",
@@ -38,82 +38,122 @@ public class AdminController {
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "role", required = false) Role role,
             @RequestParam(value = "status", required = false) Status status,
-            @SessionAttribute(name = "adminLogin", required = false) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) Long adminSessionId
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(adminService.getAdminDynamic(
-                pageable, name, email, role, status, adminSession.getId()
-        ));
+
+        Page<GetAllAdminResponse> responses = adminService.getAdminDynamic(
+                pageable, name, email, role, status, adminSessionId
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.of(
+                HttpStatus.OK.value(),
+                "관리자 목록 조회 성공",
+                responses)
+        );
+
     }
 
     // 단건조회, (최소 관리자 이상만 조회 가능)
     @GetMapping("/{adminId}")
-    public ResponseEntity<GetOneAdminResponse> getOne(
+    public ResponseEntity<ApiResponse<GetOneAdminResponse>> getOne(
             @PathVariable Long adminId,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(adminService.getOneAdmin(adminId,adminSession.getId()));
+        GetOneAdminResponse response = adminService.getOneAdmin(adminId, adminSessionId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.of(
+                        HttpStatus.OK.value(),
+                        "관리자 단건 조회 성공",
+                        response
+                )
+        );
     }
 
     // SUPER Role 계정만 가능, 원하는 관리자 정보 수정
     @PatchMapping("/{adminId}")
-    public ResponseEntity<Void> updateOne(
+    public ResponseEntity<ApiResponse<Void>> updateOne(
             @Valid @RequestBody UpdateAdminRequest request,
             @PathVariable Long adminId,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
-            ) {
-        adminService.updateAdminInfo(request, adminId, adminSession.getId());
-        return ResponseEntity.status(HttpStatus.OK).build();
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
+    ) {
+        adminService.updateAdminInfo(request, adminId, adminSessionId);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.of(
+                        HttpStatus.OK.value(),
+                        "관리자 정보 수정 성공"
+                )
+        );
     }
 
     // SUPER Role 계정만 가능, 관리자 상태 변경
     @PatchMapping("/{adminId}/status")
-    public ResponseEntity<Void> updateStatus(
+    public ResponseEntity<ApiResponse<Void>> updateStatus(
             @PathVariable Long adminId,
             @Valid @RequestBody UpdateAdminStatusRequest request,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
-        adminService.updateAdminStatus(adminId, request, adminSession.getId());
-        return ResponseEntity.status(HttpStatus.OK).build();
+        adminService.updateAdminStatus(adminId, request, adminSessionId);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.of(
+                        HttpStatus.OK.value(),
+                        "관리자 상태 변경 성공"
+                )
+        );
     }
 
     // SUPER Role 계정만 가능, 관리자 상태 변경
-    @PatchMapping("{admindId}/dismiss")
-    public ResponseEntity<Void> rejectAdmin(
+    @PatchMapping("/{admindId}/dismiss")
+    public ResponseEntity<ApiResponse<Void>> rejectAdmin(
             @PathVariable Long adminId,
             @Valid @RequestBody RejectAdminRequest request,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
-        adminService.rejectAdmin(adminId,request, adminSession.getId());
-        return ResponseEntity.status(HttpStatus.OK).build();
+        adminService.rejectAdmin(adminId, request, adminSessionId);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.of(
+                        HttpStatus.OK.value(),
+                        "관리자 승인 거절 성공"
+                )
+        );
     }
 
     // SUPER Role 계정만 가능, 관리자 역할 변경
     @PatchMapping("/{adminId}/role")
-    public ResponseEntity<Void> updateRole(
+    public ResponseEntity<ApiResponse<Void>> updateRole(
             @PathVariable Long adminId,
             @Valid @RequestBody UpdateAdminRoleRequest request,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
-        adminService.updateAdminRole(adminId, request, adminSession.getId());
-        return ResponseEntity.status(HttpStatus.OK).build();
+        adminService.updateAdminRole(adminId, request, adminSessionId);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.of(
+                        HttpStatus.OK.value(),
+                        "관리자 역할 변경 성공"
+                )
+        );
     }
 
     @PatchMapping("/{adminId}/approve")
-    public ResponseEntity<Void> approveAdmin(
+    public ResponseEntity<ApiResponse<Void>> approveAdmin(
             @PathVariable Long adminId,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
-        Long sessionAdminId = adminSession.getId();
-
-        adminService.approveAdmin(adminId, sessionAdminId);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        adminService.approveAdmin(adminId, adminSessionId);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.of(
+                        HttpStatus.OK.value(),
+                        "관리자 승인 성공"
+                )
+        );
     }
 
     // 로그인 한 관리자의 패스워드 변경
     @PatchMapping("/password")
-    public ResponseEntity<Void> updateMyPassword(
+    public ResponseEntity<ApiResponse<Void>> updateMyPassword(
             @Valid @RequestBody UpdateMyPasswordRequest request,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
         // 컨트롤러에서 패스워드 유요값 검증
         if (request.isDifferentPassword()) {
@@ -121,20 +161,30 @@ public class AdminController {
         }
 
 
-        adminService.updateMyPassword(request, adminSession.getId());
-        return ResponseEntity.status(HttpStatus.OK).build();
+        adminService.updateMyPassword(request, adminSessionId);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.of(
+                        HttpStatus.OK.value(),
+                        "비밀번호 변경 성공"
+                )
+        );
     }
 
     //  로그인 한 관리자의 프로필 정보 변경
     @PatchMapping("/profile")
-    public ResponseEntity<Void> updateMyProfile(
+    public ResponseEntity<ApiResponse<Void>> updateMyProfile(
             @Valid @RequestBody UpdateAdminRequest request,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
 
         // 자기 자신의 프로필 업데이트를 하든지 Admin이 다른 관리자 프로필을 수정하던지 동일한 메서드 사용해오 될듯?
-        adminService.updateMyInfo(request, adminSession.getId());
-        return ResponseEntity.status(HttpStatus.OK).build();
+        adminService.updateMyInfo(request, adminSessionId);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.of(
+                        HttpStatus.OK.value(),
+                        "내 프로필 수정 성공"
+                )
+        );
     }
 
 }
