@@ -1,5 +1,6 @@
 package com.example.ecommercesystemproject.product.dto;
 
+import com.example.ecommercesystemproject.product.entity.Product;
 import com.example.ecommercesystemproject.product.entity.ProductStatus;
 
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ public record GetProductResponse
 
     public static GetProductResponse from(Product p) {
         return new GetProductResponse
-                (p.getProduct_name(), p.getCategory(), p.getPrice(), p.getStock(), p.getStatus(),
-                        p.getAdmin_id().getName(), p.getAdmin_id().getEmail(), p.getCreatedAt());
+                (p.getProductName(), p.getCategory(), p.getPrice(), p.getStock(), p.getStatus(),
+                        p.getAdmin().getName(), p.getAdmin().getEmail(), p.getCreatedAt());
     }
 }

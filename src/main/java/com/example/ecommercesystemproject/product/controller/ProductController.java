@@ -1,6 +1,7 @@
 package com.example.ecommercesystemproject.product.controller;
 
 import com.example.ecommercesystemproject.admin.dto.AdminSession;
+import com.example.ecommercesystemproject.common.constant.SessionConst;
 import com.example.ecommercesystemproject.product.dto.*;
 import com.example.ecommercesystemproject.product.service.ProductService;
 import jakarta.validation.Valid;
@@ -18,7 +19,7 @@ public class ProductController {
     @PostMapping("/api/products")
     public ResponseEntity<CreateProductResponse> create
             (@Valid @RequestBody CreateProductRequest request,
-            @SessionAttribute(name = "loginAdmin", required = false) AdminSession loginAdmin) {
+            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) AdminSession loginAdmin) {
 
         Long longAdminId = loginAdmin == null ? null : loginAdmin.getId();
         return ResponseEntity.status(HttpStatus.CREATED)

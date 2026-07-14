@@ -63,7 +63,7 @@ public class Product {
     public void editStatus(ProductStatus status) {
         this.status = status;
     }
-}
+
 
     // 재고 복구
 
