@@ -6,8 +6,7 @@ import com.example.ecommercesystemproject.admin.entity.Status;
 import com.example.ecommercesystemproject.admin.service.AdminService;
 import com.example.ecommercesystemproject.common.constant.SessionConst;
 import com.example.ecommercesystemproject.common.response.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import io.swagger.v3.oas.annotations.Parameter;
 import com.example.ecommercesystemproject.common.exception.DifferentPasswordException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,11 +38,11 @@ public class AdminController {
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "role", required = false) Role role,
             @RequestParam(value = "status", required = false) Status status,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) Long adminSessionId
     ) {
 
         Page<GetAllAdminResponse> responses = adminService.getAdminDynamic(
-                pageable, name, email, role, status, adminSession.getId()
+                pageable, name, email, role, status, adminSessionId
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -59,9 +58,9 @@ public class AdminController {
     @GetMapping("/{adminId}")
     public ResponseEntity<ApiResponse<GetOneAdminResponse>> getOne(
             @PathVariable Long adminId,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
-        GetOneAdminResponse response = adminService.getOneAdmin(adminId, adminSession.getId());
+        GetOneAdminResponse response = adminService.getOneAdmin(adminId, adminSessionId);
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.of(
@@ -77,9 +76,9 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Void>> updateOne(
             @Valid @RequestBody UpdateAdminRequest request,
             @PathVariable Long adminId,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
-        adminService.updateAdminInfo(request, adminId, adminSession.getId());
+        adminService.updateAdminInfo(request, adminId, adminSessionId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.of(
                         HttpStatus.OK.value(),
@@ -93,9 +92,9 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Void>> updateStatus(
             @PathVariable Long adminId,
             @Valid @RequestBody UpdateAdminStatusRequest request,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
-        adminService.updateAdminStatus(adminId, request, adminSession.getId());
+        adminService.updateAdminStatus(adminId, request, adminSessionId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.of(
                         HttpStatus.OK.value(),
@@ -109,9 +108,9 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Void>> rejectAdmin(
             @PathVariable Long adminId,
             @Valid @RequestBody RejectAdminRequest request,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
-        adminService.rejectAdmin(adminId, request, adminSession.getId());
+        adminService.rejectAdmin(adminId, request, adminSessionId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.of(
                         HttpStatus.OK.value(),
@@ -125,9 +124,9 @@ public class AdminController {
     public ResponseEntity<ApiResponse<Void>> updateRole(
             @PathVariable Long adminId,
             @Valid @RequestBody UpdateAdminRoleRequest request,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
-        adminService.updateAdminRole(adminId, request, adminSession.getId());
+        adminService.updateAdminRole(adminId, request, adminSessionId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.of(
                         HttpStatus.OK.value(),
@@ -139,11 +138,9 @@ public class AdminController {
     @PatchMapping("/{adminId}/approve")
     public ResponseEntity<ApiResponse<Void>> approveAdmin(
             @PathVariable Long adminId,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
-        Long sessionAdminId = adminSession.getId();
-
-        adminService.approveAdmin(adminId, sessionAdminId);
+        adminService.approveAdmin(adminId, adminSessionId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.of(
                         HttpStatus.OK.value(),
@@ -156,7 +153,7 @@ public class AdminController {
     @PatchMapping("/password")
     public ResponseEntity<ApiResponse<Void>> updateMyPassword(
             @Valid @RequestBody UpdateMyPasswordRequest request,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
         // 컨트롤러에서 패스워드 유요값 검증
         if (request.isDifferentPassword()) {
@@ -164,7 +161,7 @@ public class AdminController {
         }
 
 
-        adminService.updateMyPassword(request, adminSession.getId());
+        adminService.updateMyPassword(request, adminSessionId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.of(
                         HttpStatus.OK.value(),
@@ -177,11 +174,11 @@ public class AdminController {
     @PatchMapping("/profile")
     public ResponseEntity<ApiResponse<Void>> updateMyProfile(
             @Valid @RequestBody UpdateAdminRequest request,
-            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) AdminSession adminSession
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
     ) {
 
         // 자기 자신의 프로필 업데이트를 하든지 Admin이 다른 관리자 프로필을 수정하던지 동일한 메서드 사용해오 될듯?
-        adminService.updateMyInfo(request, adminSession.getId());
+        adminService.updateMyInfo(request, adminSessionId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.of(
                         HttpStatus.OK.value(),
