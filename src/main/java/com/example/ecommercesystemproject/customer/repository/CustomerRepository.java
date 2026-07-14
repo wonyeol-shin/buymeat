@@ -10,9 +10,12 @@ import org.springframework.data.repository.query.Param;
 
 
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
-    Page<Customer> findByStatus(CustomerStatus status, Pageable pageable);
-    Page<Customer> findByNameContainingOrEmailContaining(String nameKeyword, String emailKeyword, Pageable pageable);
 
-    @Query("SELECT c FROM Customer c WHERE (:keyword IS NULL OR c.name LIKE %:keyword% OR c.email LIKE %:keyword%) AND (:status IS NULL OR c.status = :status)")
+    @Query("""
+            SELECT c
+            FROM Customer c
+            WHERE
+            (:keyword IS NULL OR c.name LIKE CONCAT('%',:keyword,'%') OR c.email LIKE CONCAT('%',:keyword,'%'))
+            AND (:status IS NULL OR c.status = :status)""")
     Page<Customer> searchByKeywordAndStatus(@Param("keyword") String keyword, @Param("status") CustomerStatus status, Pageable pageable);
 }
