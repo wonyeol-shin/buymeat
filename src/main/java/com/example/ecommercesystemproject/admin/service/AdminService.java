@@ -70,12 +70,12 @@ public class AdminService {
 
         return adminRepository.findAll(adminSpecification, pageable).map(
                 findedAdmin -> new GetAllAdminResponse(
-                        admin.getId(),
-                        admin.getName(),
-                        admin.getEmail(),
-                        admin.getStatus(),
-                        admin.getCreatedAt(),
-                        admin.getApprovedAt()
+                        findedAdmin.getId(),
+                        findedAdmin.getName(),
+                        findedAdmin.getEmail(),
+                        findedAdmin.getStatus(),
+                        findedAdmin.getCreatedAt(),
+                        findedAdmin.getApprovedAt()
                 )
         );
     }
