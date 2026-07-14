@@ -104,7 +104,7 @@ public class AdminController {
     }
 
     // SUPER Role 계정만 가능, 관리자 상태 변경
-    @PatchMapping("/{admindId}/dismiss")
+    @PatchMapping("/{adminId}/dismiss")
     public ResponseEntity<ApiResponse<Void>> rejectAdmin(
             @PathVariable Long adminId,
             @Valid @RequestBody RejectAdminRequest request,
@@ -183,6 +183,22 @@ public class AdminController {
                 ApiResponse.of(
                         HttpStatus.OK.value(),
                         "내 프로필 수정 성공"
+                )
+        );
+    }
+
+    // 관리자를 삭제(비활성화) 한다.
+    @DeleteMapping("{adminId}")
+    public ResponseEntity<ApiResponse<Void>> delete(
+            @PathVariable Long adminId,
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
+    ) {
+        adminService.deleteAdmin(adminId, adminSessionId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.of(
+                        HttpStatus.OK.value(),
+                        "관리자 비활성화 성공"
                 )
         );
     }

@@ -6,6 +6,6 @@ import lombok.Getter;
 
 @Getter
 public class UpdateAdminStatusRequest {
-    @NotBlank(message = "상태값은 필수 입니다.")
+    //@NotBlank(message = "상태값은 필수 입니다.")
     private Status status;
 }
