@@ -115,7 +115,7 @@ public class OrderService {
                 order.getId(),
                 order.getOrderNumber(),
                 customer.getName(),
-                product.getProduct_name(),
+                product.getProductName(),
                 order.getQuantity(),
                 order.getCreatedAt().toLocalDate(),
                 order.getStatus(),

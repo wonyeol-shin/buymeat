@@ -11,7 +11,7 @@ public record GetProductsResponse
 
     public static GetProductsResponse from(Product p) {
         return new GetProductsResponse
-                (p.getId(), p.getAdmin_id().getName(), p.getProduct_name(), p.getCategory(),
+                (p.getId(), p.getAdmin().getName(), p.getProductName(), p.getCategory(),
                 p.getPrice(), p.getStock(), p.getStatus(), p.getCreatedAt());
     }
 }

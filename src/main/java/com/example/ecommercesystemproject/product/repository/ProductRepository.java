@@ -15,11 +15,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // JOIN FETCH로 admin을 함께 가져와서 목록에서 등록 관리자명 조회 시 N+1 방지
     @Query(
             value = "SELECT p FROM Product p JOIN FETCH p.admin " +
-                    "WHERE (:keyword IS NULL OR p.product_name LIKE CONCAT('%', :keyword, '%')) " +
+                    "WHERE (:keyword IS NULL OR p.productName LIKE CONCAT('%', :keyword, '%')) " +
                     "AND (:category IS NULL OR p.category = :category) " +
                     "AND (:status IS NULL OR p.status = :status)",
             countQuery = "SELECT COUNT(p) FROM Product p " +
-                    "WHERE (:keyword IS NULL OR p.product_name LIKE CONCAT('%', :keyword, '%')) " +
+                    "WHERE (:keyword IS NULL OR p.productName LIKE CONCAT('%', :keyword, '%')) " +
                     "AND (:category IS NULL OR p.category = :category) " +
                     "AND (:status IS NULL OR p.status = :status)"
     )
