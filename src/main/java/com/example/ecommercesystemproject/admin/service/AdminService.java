@@ -91,7 +91,7 @@ public class AdminService {
         checkActiveAccount(admin.getStatus());
 
         // 찾을려는 관리자가 없는 관리자
-        Admin findedAdmin = adminRepository.findById(sessionAdminId).orElseThrow(
+        Admin findedAdmin = adminRepository.findById(adminId).orElseThrow(
                 () ->  new ServiceException("없는 유저입니다", HttpStatus.BAD_REQUEST)
         );
 
@@ -117,7 +117,7 @@ public class AdminService {
         checkActiveAccount(admin.getStatus());
         checkSuperAccount(admin.getRole());
 
-
+        // 찾을려는 관리자가 없는 관리자
         Admin findedAdmin = adminRepository.findById(adminId).orElseThrow(
                 () ->  new ServiceException("없는 유저입니다", HttpStatus.BAD_REQUEST)
         );
@@ -127,10 +127,13 @@ public class AdminService {
 
     @Transactional
     public void approveAdmin(Long adminId, Long sessionAdminId) {
+
+        // 로그인 한 계정이 존재하지 않는 id 일경우 에러, 유효하면 Admin return
         Admin admin = findAdminExist(sessionAdminId);
 
-        if (admin.getStatus() != Status.ACTIVE && admin.getRole() != Role.SUPER)
-            throw new IllegalStateException("변경 할 권한 없음");
+        checkActiveAccount(admin.getStatus());
+        checkSuperAccount(admin.getRole());
+
 
         Admin findedAdmin = adminRepository.findById(adminId)
                 .orElseThrow(() -> new ServiceException("없는 유저", HttpStatus.NOT_FOUND));
@@ -183,6 +186,10 @@ public class AdminService {
         Admin findedAdmin = adminRepository.findById(adminId).orElseThrow(
                 () -> new ServiceException("없는 유저입니다", HttpStatus.BAD_REQUEST)
         );
+
+        if (findedAdmin.getRole() == request.getRole()) {
+            throw new ServiceException("변경 하려는 역할과 해당 관리자는 현재 역할은 동일합니다", HttpStatus.BAD_REQUEST);
+        }
 
         try {
             Role role = request.getRole();
@@ -246,6 +253,23 @@ public class AdminService {
         }
 
         findedAdmin.reject(request.getRejectReason());
+
+    }
+
+    // 관리자를 삭제(비활성화) 한다.
+    @Transactional
+    public void deleteAdmin(Long adminId, Long adminSessionId) {
+        // 로그인 한 계정이 존재하지 않는 id 일경우 에러, 유효하면 Admin return
+        Admin admin = findAdminExist(adminSessionId);
+
+        checkActiveAccount(admin.getStatus());
+        checkSuperAccount(admin.getRole());
+
+        Admin findedAdmin = adminRepository.findById(adminId).orElseThrow(
+                () -> new ServiceException("없는 유저입니다", HttpStatus.BAD_REQUEST)
+        );
+
+        findedAdmin.updateNormalStatus(Status.INACTIVE);
 
     }
 }
