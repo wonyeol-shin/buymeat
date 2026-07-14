@@ -1,5 +1,6 @@
 package com.example.ecommercesystemproject.review.repository;
 
+import com.example.ecommercesystemproject.dashboard.dto.RatingDistribution;
 import com.example.ecommercesystemproject.review.entity.Review;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
@@ -50,4 +51,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Optional<Review> findByIdWithCustomerAndOrder(@NonNull Long reviewId);
 
     List<Review> findAllByProduct_Id(Long productId, Sort sort);
+    // dashboard(charts) dto - RatingDistribution
+    @Query("SELECT new com.example.ecommercesystemproject.dashboard.dto.RatingDistribution(r.grade, COUNT(r)) " +
+            "FROM Review r GROUP BY r.grade")
+    List<RatingDistribution> countGroupByGrade();
+
 }

@@ -8,6 +8,10 @@ import com.example.ecommercesystemproject.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,10 +38,12 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<GetProductsResponse>>> getAll(
-            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+    public ResponseEntity<ApiResponse<Page<GetProductsResponse>>> getAll(
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId,
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            ProductSearchCondition condition
     ) {
-        List<GetProductsResponse> responses = productService.getAllProducts(sessionAdminId);
+        Page<GetProductsResponse> responses = productService.getAllProducts(sessionAdminId, pageable, condition);
         return ResponseEntity.ok(
                 ApiResponse.of(
                         HttpStatus.OK.value(),

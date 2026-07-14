@@ -1,12 +1,15 @@
 package com.example.ecommercesystemproject.product.repository;
 
+import com.example.ecommercesystemproject.dashboard.dto.CategoryDistribution;
 import com.example.ecommercesystemproject.product.entity.Product;
+import com.example.ecommercesystemproject.product.entity.ProductStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -26,11 +29,16 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> search(
             @Param("keyword") String keyword,
             @Param("category") String category,
-            @Param("status") String status,
+            @Param("status") ProductStatus status,
             Pageable pageable
     );
 
     // 상세 조회: admin을 함께 가져와서 등록 관리자명/이메일 조회 시 추가 쿼리 방지
     @Query("SELECT p FROM Product p JOIN FETCH p.admin WHERE p.id = :id")
     Optional<Product> findWithAdminById(@Param("id") Long id);
+
+    // dashboard(charts) dto - CategoryDistribution
+    @Query("SELECT new com.example.ecommercesystemproject.dashboard.dto.CategoryDistribution(p.category, COUNT(p)) " +
+            "FROM Product p GROUP BY p.category")
+    List<CategoryDistribution> countGroupByCategory();
 }

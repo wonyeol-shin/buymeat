@@ -9,6 +9,8 @@ import com.example.ecommercesystemproject.product.repository.ProductRepository;
 import com.example.ecommercesystemproject.review.dto.ListReviewResponse;
 import com.example.ecommercesystemproject.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.*;
@@ -38,13 +40,12 @@ public class ProductService {
         return CreateProductResponse.from(saveProduct);
     }
 
-    // 상품 리스트 조회
-    @Transactional
-    public List<GetProductsResponse> getAllProducts(Long adminId) {
+    // 상품 리스트 조회 + 페이징, 검색필터
+    @Transactional(readOnly = true)
+    public Page<GetProductsResponse> getAllProducts(Long adminId, Pageable pageable, ProductSearchCondition condition) {
         checkLogin(adminId);
-
-        List<Product> products = productRepository.findAll();
-        return products.stream().map(GetProductsResponse::from).toList();
+        Page<Product> products = productRepository.search(condition.getKeyword(), condition.getCategory(), condition.getStatus(), pageable);
+        return products.map(GetProductsResponse::from);
     }
 
     // 상품 상세 조회

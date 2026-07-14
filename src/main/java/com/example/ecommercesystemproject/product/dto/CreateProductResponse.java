@@ -6,7 +6,7 @@ import com.example.ecommercesystemproject.product.entity.ProductStatus;
 import java.time.LocalDateTime;
 
 public record CreateProductResponse
-        (Long id, String product_name, String category, Long price,
+        (Long id, String productName, String category, Long price,
          Integer stock, ProductStatus status, LocalDateTime createdAt) {
 
     public static CreateProductResponse from(Product p) {
