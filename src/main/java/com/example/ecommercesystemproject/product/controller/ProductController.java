@@ -19,12 +19,10 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping("/api/products")
-    public ResponseEntity<ApiResponse<CreateProductResponse>> create
-            (@Valid @RequestBody CreateProductRequest request,
-             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
-            ) {
-
-     
+    public ResponseEntity<ApiResponse<CreateProductResponse>> create(
+            @Valid @RequestBody CreateProductRequest request,
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+    ) {
         CreateProductResponse response = productService.createProduct(request, sessionAdminId);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse.of(
@@ -35,11 +33,9 @@ public class ProductController {
     }
 
     @GetMapping("/api/products")
-    public ResponseEntity<ApiResponse<List<GetProductsResponse>>> getAll
-            (@Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
-            ) {
-
-       
+    public ResponseEntity<ApiResponse<List<GetProductsResponse>>> getAll(
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+    ) {
         List<GetProductsResponse> responses = productService.getAllProducts(sessionAdminId);
         return ResponseEntity.ok(
                 ApiResponse.of(
@@ -51,11 +47,10 @@ public class ProductController {
     }
 
     @GetMapping("/api/products/{productId}")
-    public ResponseEntity<ApiResponse<GetProductResponse>> getOne
-            (@PathVariable Long productId,
-             @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) Long sessionAdminId) {
-
-       
+    public ResponseEntity<ApiResponse<GetProductResponse>> getOne(
+            @PathVariable Long productId,
+            @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) Long sessionAdminId
+    ) {
         GetProductResponse response = productService.getOneProduct(productId, sessionAdminId);
 
         return ResponseEntity.ok(
@@ -68,12 +63,11 @@ public class ProductController {
     }
 
     @PutMapping("/api/products/{productId}")
-    public ResponseEntity<ApiResponse<UpdateProductResponse>> update
-            (@PathVariable Long productId, @Valid @RequestBody UpdateProductRequest request,
-             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
-            ) {
-
-     
+    public ResponseEntity<ApiResponse<UpdateProductResponse>> update(
+            @PathVariable Long productId,
+            @Valid @RequestBody UpdateProductRequest request,
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+    ) {
         UpdateProductResponse response = productService.updateProduct(productId, request, sessionAdminId);
 
         return ResponseEntity.ok(
@@ -86,12 +80,11 @@ public class ProductController {
     }
 
     @PatchMapping("/api/products/{productId}/stock")
-    public ResponseEntity<ApiResponse<UpdateProductStockResponse>> updateStock
-            (@PathVariable Long productId, @Valid @RequestBody UpdateProductStockRequest request,
-             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
-            ) {
-
-        
+    public ResponseEntity<ApiResponse<UpdateProductStockResponse>> updateStock(
+            @PathVariable Long productId,
+            @Valid @RequestBody UpdateProductStockRequest request,
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+    ) {
         UpdateProductStockResponse response = productService.updateProductStock(productId, request, sessionAdminId);
 
         return ResponseEntity.ok(
@@ -104,12 +97,10 @@ public class ProductController {
     }
 
     @PatchMapping("/api/products/{productId}/status")
-    public ResponseEntity<ApiResponse<UpdateProductStatusResponse>> updateStatus
-            (@PathVariable Long productId, @Valid @RequestBody UpdateProductStatusRequest request,
-             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
-            ) {
-
-       
+    public ResponseEntity<ApiResponse<UpdateProductStatusResponse>> updateStatus(
+            @PathVariable Long productId, @Valid @RequestBody UpdateProductStatusRequest request,
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+    ) {
         UpdateProductStatusResponse response = productService.updateProductStatus(productId, request, sessionAdminId);
 
         return ResponseEntity.ok(
@@ -122,11 +113,10 @@ public class ProductController {
     }
 
     @DeleteMapping("/api/products/{productId}")
-    public ResponseEntity<Void> delete
-            (@PathVariable Long productId,
-             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
-            ) {
-
+    public ResponseEntity<Void> delete(
+            @PathVariable Long productId,
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+    ) {
         productService.deleteProduct(productId, sessionAdminId);
         return ResponseEntity.noContent().build(); // 204
     }
