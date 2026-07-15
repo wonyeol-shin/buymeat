@@ -19,8 +19,10 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             SELECT c
             FROM Customer c
             WHERE
-            (:keyword IS NULL OR c.name LIKE CONCAT('%',:keyword,'%') OR c.email LIKE CONCAT('%',:keyword,'%'))
-            AND (:status IS NULL OR c.status = :status)""")
+                (:keyword IS NULL OR c.name LIKE CONCAT('%',:keyword,'%') OR c.email LIKE CONCAT('%',:keyword,'%'))
+            AND (:status IS NULL OR c.status = :status)
+            """
+    )
     Page<Customer> searchByKeywordAndStatus(@Param("keyword") String keyword, @Param("status") CustomerStatus status, Pageable pageable);
 
     // dashboard(charts) dto - CustomerStatusDistribution
