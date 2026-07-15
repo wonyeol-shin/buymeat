@@ -1,6 +1,7 @@
 package com.example.ecommercesystemproject.product.service;
 
 import com.example.ecommercesystemproject.admin.entity.Admin;
+import com.example.ecommercesystemproject.admin.entity.Role;
 import com.example.ecommercesystemproject.admin.repository.AdminRepository;
 import com.example.ecommercesystemproject.common.ServiceException;
 import com.example.ecommercesystemproject.product.dto.*;
@@ -26,12 +27,36 @@ public class ProductService {
     private final AdminRepository adminRepository;
     private final ReviewService reviewService;
 
+
+    private Admin getAdminOrThrow(Long adminId) {
+
+        if (adminId == null) {
+            throw new ServiceException(
+                    "로그인이 필요합니다.",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        return adminRepository.findById(adminId)
+                .orElseThrow(() -> new ServiceException("유효하지 않은 관리자", HttpStatus.NOT_FOUND));
+
+    }
+
+    private void validateProductManagerRole(Admin admin) {
+        if (admin.getRole() != Role.SUPER && admin.getRole() != Role.OP) {
+            throw new ServiceException(
+                    "상품 관리 권한이 없습니다.",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+    }
+
     // 상품 등록
     @Transactional
     public CreateProductResponse createProduct(CreateProductRequest request, Long adminId) {
-        Admin admin = adminRepository.findById(adminId)
-                .orElseThrow(() -> new ServiceException("유효하지 않은 관리자", HttpStatus.NOT_FOUND));
-        checkLogin(adminId);
+
+        Admin admin = getAdminOrThrow(adminId);
+        validateProductManagerRole(admin);
 
         Product product = new Product(request.getProduct_name(), request.getCategory(),
                 request.getPrice(), request.getStock(), admin);
@@ -40,10 +65,15 @@ public class ProductService {
         return CreateProductResponse.from(saveProduct);
     }
 
+
+
     // 상품 리스트 조회 + 페이징, 검색필터
     @Transactional(readOnly = true)
     public Page<GetProductsResponse> getAllProducts(Long adminId, Pageable pageable, ProductSearchCondition condition) {
-        checkLogin(adminId);
+
+        Admin admin = getAdminOrThrow(adminId);
+        validateProductManagerRole(admin);
+
         Page<Product> products = productRepository.search(condition.getKeyword(), condition.getCategory(), condition.getStatus(), pageable);
         return products.map(GetProductsResponse::from);
     }
@@ -51,7 +81,10 @@ public class ProductService {
     // 상품 상세 조회
     @Transactional
     public GetProductResponse getOneProduct(Long id, Long adminId) {
-        checkLogin(adminId);
+
+        Admin admin = getAdminOrThrow(adminId);
+        validateProductManagerRole(admin);
+
         Product product = checkKey(id);
 
         List<ListReviewResponse> reviewList = reviewService.getAllReviewByProduct(id);
@@ -84,7 +117,10 @@ public class ProductService {
     // 상품 업데이트
     @Transactional
     public UpdateProductResponse updateProduct(Long id, UpdateProductRequest request, Long adminId) {
-        checkLogin(adminId);
+
+        Admin admin = getAdminOrThrow(adminId);
+        validateProductManagerRole(admin);
+
         Product product = checkKey(id);
 
         product.editProduct(request.getProduct_name(), request.getCategory(), request.getPrice());
@@ -94,7 +130,10 @@ public class ProductService {
     // 상품 재고 수정
     @Transactional
     public UpdateProductStockResponse updateProductStock(Long id, UpdateProductStockRequest request, Long adminId) {
-        checkLogin(adminId);
+
+        Admin admin = getAdminOrThrow(adminId);
+        validateProductManagerRole(admin);
+
         Product product = checkKey(id);
 
         product.editStock(request.getStock());
@@ -104,7 +143,10 @@ public class ProductService {
     // 상품 상태 수정
     @Transactional
     public UpdateProductStatusResponse updateProductStatus(Long id, UpdateProductStatusRequest request, Long adminId) {
-        checkLogin(adminId);
+
+        Admin admin = getAdminOrThrow(adminId);
+        validateProductManagerRole(admin);
+
         Product product = checkKey(id);
 
         product.editStatus(request.getStatus());
@@ -114,7 +156,10 @@ public class ProductService {
     // 상품 삭제
     @Transactional
     public void deleteProduct(Long id, Long adminId) {
-        checkLogin(adminId);
+
+        Admin admin = getAdminOrThrow(adminId);
+        validateProductManagerRole(admin);
+
         Product product = checkKey(id);
 
         productRepository.delete(product);
@@ -127,10 +172,4 @@ public class ProductService {
         );
     }
 
-    // 관리자 로그인 여부 확인
-    private void checkLogin(Long loginUserId) {
-        if (loginUserId == null) {
-            throw new ServiceException("로그인이 필요합니다.", HttpStatus.FORBIDDEN); // 401
-        }
-    }
 }
