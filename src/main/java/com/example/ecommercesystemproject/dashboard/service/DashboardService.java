@@ -1,7 +1,9 @@
 package com.example.ecommercesystemproject.dashboard.service;
 
+import com.example.ecommercesystemproject.admin.entity.Admin;
 import com.example.ecommercesystemproject.admin.entity.Status;
 import com.example.ecommercesystemproject.admin.repository.AdminRepository;
+import com.example.ecommercesystemproject.common.ServiceException;
 import com.example.ecommercesystemproject.customer.enums.CustomerStatus;
 import com.example.ecommercesystemproject.customer.repository.CustomerRepository;
 import com.example.ecommercesystemproject.dashboard.dto.*;
@@ -16,12 +18,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +38,37 @@ public class DashboardService {
 
         private static final int RECENT_ORDER_LIMIT = 10;
 
+        private void validateActiveAdmin(Long adminId) {
+                Admin admin = adminRepository.findById(adminId)
+                        .orElseThrow(() -> new ServiceException(
+                                "관리자 정보를 찾을 수 없습니다.",
+                                HttpStatus.NOT_FOUND
+                        ));
+
+                if (admin.getStatus() != Status.ACTIVE) {
+                        throw new ServiceException(
+                                "비활성화된 관리자는 대시보드를 조회할 수 없습니다.",
+                                HttpStatus.FORBIDDEN
+                        );
+                }
+        }
+
         @Transactional(readOnly = true)
-        public DashboardChartsResponse getDashboardCharts() {
+        public DashboardStatsResponse getDashboardStats(Long adminId) {
+                validateActiveAdmin(adminId);
+
+                DashboardChartsResponse charts = getDashboardCharts();
+                DashboardSummaryResponse summary = getDashboardSummary();
+                DashboardWidgetDto widget = getDashboardWidget();
+
+                return new DashboardStatsResponse(
+                        charts,
+                        summary,
+                        widget
+                );
+        }
+
+        private DashboardChartsResponse getDashboardCharts() {
 
                 // 리뷰 평점 분포
                 List<RatingDistribution> reviewRatingDistribution = reviewRepository.countGroupByGrade();
@@ -73,7 +104,7 @@ public class DashboardService {
         }
 
         // Summary 통계
-        public DashboardSummaryResponse getDashboardSummary() {
+        private DashboardSummaryResponse getDashboardSummary() {
                 // 고객 통계
                 long allCustomers = customerRepository.count();
                 long activeCustomers = customerRepository.countByStatus(CustomerStatus.ACTIVE);
@@ -104,8 +135,7 @@ public class DashboardService {
                   );
         }
 
-        @Transactional(readOnly = true)
-        public DashboardWidgetDto getDashboardWidget(){
+        private DashboardWidgetDto getDashboardWidget(){
 
                 // 오늘 총 매출
                 Long todayTotalSales = orderRepository.sumTotalPriceToday(LocalDate.now().atStartOfDay());
