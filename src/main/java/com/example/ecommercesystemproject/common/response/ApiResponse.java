@@ -1,8 +1,10 @@
 package com.example.ecommercesystemproject.common.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 
 @Getter
+@JsonInclude(JsonInclude.Include.NON_NULL) // 💡 null인 필드는 JSON 변환 시 자동으로 제외합니다!
 public class ApiResponse<T> {
 
     private final int status;
