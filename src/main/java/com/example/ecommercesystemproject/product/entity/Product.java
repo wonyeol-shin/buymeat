@@ -3,10 +3,13 @@ package com.example.ecommercesystemproject.product.entity;
 import com.example.ecommercesystemproject.admin.entity.Admin;
 // import com.example.ecommercesystemproject.common.entity.BaseTimeEntity; // 생성일, 수정일 상속 클래스가 있다면 사용
 import com.example.ecommercesystemproject.common.BaseEntity;
+import com.example.ecommercesystemproject.common.ServiceException;
 import com.example.ecommercesystemproject.common.exception.BadRequestException;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -69,8 +72,9 @@ public class Product {
 
     public void restoreStock(int quantity) {
         if (quantity <= 0) {
-            throw new IllegalStateException(
-                    "복구할 재고 수량은 1개 이상이어야 합니다."
+            throw new ServiceException(
+                    "복구할 재고 수량은 1개 이상이어야 합니다.",
+                    HttpStatus.BAD_REQUEST
             );
         }
 
@@ -85,4 +89,34 @@ public class Product {
         this.status = ProductStatus.ACTIVE;
     }
 
+    // 주문생성시 재고 파악
+    public void validateStock(int quantity) {
+        if (quantity <= 0) {
+            throw new ServiceException(
+                    "주문 수량은 1개 이상이어야 합니다.",
+                    HttpStatus.BAD_REQUEST
+                    );
+        }
+
+        if (this.stock < quantity) {
+            int shortage = quantity - this.stock;
+
+            throw new ServiceException(
+                    "재고가 부족합니다. 현재 재고: " + this.stock +
+                            "개, 부족한 수량: " + shortage + "개",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+
+    // 주문성공시 재고 감소
+    public void decreaseStock(int quantity) {
+        validateStock(quantity);
+
+        this.stock -= quantity;
+
+        if (this.stock == 0) {
+            this.status = ProductStatus.SOLD_OUT;
+        }
+    }
 }
