@@ -37,15 +37,12 @@ public class AdminController {
                     sort = "modifiedAt",
                     direction = Sort.Direction.DESC
             ) Pageable pageable,
-            @RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "email", required = false) String email,
-            @RequestParam(value = "role", required = false) Role role,
-            @RequestParam(value = "status", required = false) Status status,
+            AdminSearchCondition condition,
             @UserInfo AdminSession adminSession
     ) {
 
         Page<GetAllAdminResponse> responses = adminService.getAdminDynamic(
-                pageable, name, email, role, status, adminSession.getId()
+                pageable, condition, adminSession.getId()
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(
