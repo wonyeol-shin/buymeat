@@ -1,11 +1,10 @@
 package com.example.ecommercesystemproject.product.controller;
 
 import com.example.ecommercesystemproject.admin.dto.AdminSession;
-import com.example.ecommercesystemproject.common.constant.SessionConst;
+import com.example.ecommercesystemproject.common.annotation.UserInfo;
 import com.example.ecommercesystemproject.common.response.ApiResponse;
 import com.example.ecommercesystemproject.product.dto.*;
 import com.example.ecommercesystemproject.product.service.ProductService;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,7 +14,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -26,9 +24,9 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ApiResponse<CreateProductResponse>> create(
             @Valid @RequestBody CreateProductRequest request,
-            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+            @UserInfo AdminSession adminSession
     ) {
-        CreateProductResponse response = productService.createProduct(request, sessionAdminId);
+        CreateProductResponse response = productService.createProduct(request, adminSession.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse.of(
                         HttpStatus.CREATED.value(),
@@ -39,11 +37,11 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<GetProductsResponse>>> getAll(
-            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId,
+            @UserInfo AdminSession adminSession,
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             ProductSearchCondition condition
     ) {
-        Page<GetProductsResponse> responses = productService.getAllProducts(sessionAdminId, pageable, condition);
+        Page<GetProductsResponse> responses = productService.getAllProducts(adminSession.getId(), pageable, condition);
         return ResponseEntity.ok(
                 ApiResponse.of(
                         HttpStatus.OK.value(),
@@ -56,9 +54,9 @@ public class ProductController {
     @GetMapping("/{productId}")
     public ResponseEntity<ApiResponse<GetProductResponse>> getOne(
             @PathVariable Long productId,
-            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+            @UserInfo AdminSession adminSession
     ) {
-        GetProductResponse response = productService.getOneProduct(productId, sessionAdminId);
+        GetProductResponse response = productService.getOneProduct(productId, adminSession.getId());
 
         return ResponseEntity.ok(
                 ApiResponse.of(
@@ -73,9 +71,9 @@ public class ProductController {
     public ResponseEntity<ApiResponse<UpdateProductResponse>> update(
             @PathVariable Long productId,
             @Valid @RequestBody UpdateProductRequest request,
-            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+            @UserInfo AdminSession adminSession
     ) {
-        UpdateProductResponse response = productService.updateProduct(productId, request, sessionAdminId);
+        UpdateProductResponse response = productService.updateProduct(productId, request, adminSession.getId());
 
         return ResponseEntity.ok(
                 ApiResponse.of(
@@ -90,9 +88,9 @@ public class ProductController {
     public ResponseEntity<ApiResponse<UpdateProductStockResponse>> updateStock(
             @PathVariable Long productId,
             @Valid @RequestBody UpdateProductStockRequest request,
-            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+            @UserInfo AdminSession adminSession
     ) {
-        UpdateProductStockResponse response = productService.updateProductStock(productId, request, sessionAdminId);
+        UpdateProductStockResponse response = productService.updateProductStock(productId, request, adminSession.getId());
 
         return ResponseEntity.ok(
                 ApiResponse.of(
@@ -106,9 +104,9 @@ public class ProductController {
     @PatchMapping("/{productId}/status")
     public ResponseEntity<ApiResponse<UpdateProductStatusResponse>> updateStatus(
             @PathVariable Long productId, @Valid @RequestBody UpdateProductStatusRequest request,
-            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+            @UserInfo AdminSession adminSession
     ) {
-        UpdateProductStatusResponse response = productService.updateProductStatus(productId, request, sessionAdminId);
+        UpdateProductStatusResponse response = productService.updateProductStatus(productId, request, adminSession.getId());
 
         return ResponseEntity.ok(
                 ApiResponse.of(
@@ -122,9 +120,9 @@ public class ProductController {
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> delete(
             @PathVariable Long productId,
-            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+            @UserInfo AdminSession adminSession
     ) {
-        productService.deleteProduct(productId, sessionAdminId);
+        productService.deleteProduct(productId, adminSession.getId());
         return ResponseEntity.noContent().build(); // 204
     }
 }
