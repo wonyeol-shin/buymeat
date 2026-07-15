@@ -209,7 +209,7 @@ public class AdminService {
         // 로그인 한 계정이 활성 상태 계정이 아님
         checkActiveAccount(admin.getStatus());
 
-        if (!admin.getPassword().equals(request.getOldPassword())) {
+        if (!passwordEncoder.matches(request.getOldPassword(), admin.getPassword())) {
             throw new DifferentPasswordException("현재 패스워드와 입력한 패스워드가 일치하지 않습니다.");
         }
 
