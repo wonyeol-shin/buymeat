@@ -5,6 +5,7 @@ import com.example.ecommercesystemproject.customer.dto.*;
 import com.example.ecommercesystemproject.customer.entity.Customer;
 import com.example.ecommercesystemproject.customer.enums.CustomerStatus;
 import com.example.ecommercesystemproject.customer.repository.CustomerRepository;
+import com.example.ecommercesystemproject.order.repository.CustomerOrderStats;
 import com.example.ecommercesystemproject.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,13 +42,29 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public Page<GetCustomerResponse> getAllCustomer(Pageable pageable, CustomerSearchCondition condition) {
         Page<Customer> customers = customerRepository.searchByKeywordAndStatus(condition.getKeyword(), condition.getStatus(), pageable);
-        return customers.map(customer -> new GetCustomerResponse(
-                        customer.getId(), customer.getName(),
-                        customer.getEmail(), customer.getPhone(),
-                        customer.getStatus(), orderRepository.countByCustomerId(customer.getId()),
-                        orderRepository.sumTotalPriceByCustomerId(customer.getId()),
-                        customer.getCreatedAt(), customer.getModifiedAt()
-                ));
+
+        // customer ID list
+        List<Long> customerIds = customers.map(Customer::getId).toList();
+
+        // customers 대상으로 group 으로 한방에 조회
+        Map<Long, CustomerOrderStats> customerOrderStats = orderRepository.findOrderStatsGroupByCustomerIds(customerIds)
+                .stream()
+                .collect(Collectors.toMap(CustomerOrderStats::getCustomerId, stats -> stats));
+
+        return customers.map(customer -> {
+            CustomerOrderStats coStat = customerOrderStats.get(customer.getId());
+            return new GetCustomerResponse(
+                    customer.getId(),
+                    customer.getName(),
+                    customer.getEmail(),
+                    customer.getPhone(),
+                    customer.getStatus(),
+                    coStat.getOrderCount(),
+                    coStat.getTotalPrice(),
+                    customer.getCreatedAt(),
+                    customer.getModifiedAt()
+            );
+        });
     }
 
     // 고객 단건 조회 + 해당 고객 주문수량, 총 주문금액

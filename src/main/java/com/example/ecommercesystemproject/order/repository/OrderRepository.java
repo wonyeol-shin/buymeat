@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("""
@@ -51,4 +52,18 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // 대시보드 Summary 오늘 주문수량 가져오기
     long countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(
             LocalDateTime start, LocalDateTime end);
+
+    // grouping by customer
+    @Query("""
+        SELECT
+            o.customer.id customerId,
+            COUNT(o) orderCount,
+            COALESCE(SUM(o.totalPrice), 0) totalPrice
+        FROM Order o
+        WHERE o.customer.id IN :customerIds
+        GROUP BY o.customer.id
+    """)
+    List<CustomerOrderStats> findOrderStatsGroupByCustomerIds(
+            @Param("customerIds") List<Long> customerIds
+    );
 }
