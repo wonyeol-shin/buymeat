@@ -56,7 +56,7 @@ public class AdminService {
     // 다건조회 + 쿼리 파라미터로 값을 받아서 정렬 and 필터 + ( 촤소한 관리자들만 이용 가능 )
     @Transactional(readOnly = true)
     public Page<GetAllAdminResponse> getAdminDynamic(
-            Pageable pageable, String name, String email, Role role, Status status, Long sessionAdminId
+            Pageable pageable, AdminSearchCondition condition, Long sessionAdminId
     ) {
         // 로그인 한 계정이 존재하지 않는 id 일경우 에러, 유효하면 Admin return
         Admin admin = findAdminExist(sessionAdminId);
@@ -64,10 +64,10 @@ public class AdminService {
         checkActiveAccount(admin.getStatus());
 
         Specification<Admin> adminSpecification = Specification.where(
-                        AdminSpecification.equalName(name))
-                .and(AdminSpecification.equalEmail(email))
-                .and(AdminSpecification.equalRole(role))
-                .and(AdminSpecification.equalStatus(status));
+                        AdminSpecification.equalName(condition.getName()))
+                .and(AdminSpecification.equalEmail(condition.getEmail()))
+                .and(AdminSpecification.equalRole(condition.getRole()))
+                .and(AdminSpecification.equalStatus(condition.getStatus()));
 
         return adminRepository.findAll(adminSpecification, pageable).map(
                 findedAdmin -> new GetAllAdminResponse(

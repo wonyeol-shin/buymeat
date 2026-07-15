@@ -8,7 +8,8 @@ public class AdminSpecification {
     // name이 null이 아닐경우 where에 추가
     public static Specification<Admin> equalName(String name) {
         return (root, query, criteriaBuilder) ->
-                name == null
+                // 조건에 null이나 공백이 들어오면 없는걸로 취급
+                (name == null || name.isBlank())
                         ? null
                         : criteriaBuilder.equal(root.get("name"), name);
     }
@@ -16,7 +17,7 @@ public class AdminSpecification {
     // email이 null이 아닐경우 where에 추가
     public static Specification<Admin> equalEmail(String email) {
         return (root, query, criteriaBuilder) ->
-                email == null
+                (email == null || email.isBlank())
                         ? null
                         : criteriaBuilder.equal(root.get("email"), email);
     }
