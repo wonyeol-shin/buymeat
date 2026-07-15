@@ -59,8 +59,8 @@ public class CustomerService {
                     customer.getEmail(),
                     customer.getPhone(),
                     customer.getStatus(),
-                    coStat.getOrderCount(),
-                    coStat.getTotalPrice(),
+                    coStat == null ? 0 : coStat.getOrderCount(),
+                    coStat == null ? 0 : coStat.getTotalPrice(),
                     customer.getCreatedAt(),
                     customer.getModifiedAt()
             );
