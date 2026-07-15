@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
+
 public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("""
     SELECT o FROM Order o WHERE
@@ -29,4 +31,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     WHERE o.customer.id = :customerId
     """)
     Long sumTotalPriceByCustomerId(@Param("customerId") Long customerId);
+
+    // 대시보드 Summary 오늘 주문수량 가져오기
+    long countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(
+            LocalDateTime start, LocalDateTime end);
 }

@@ -54,4 +54,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "FROM Review r GROUP BY r.grade")
     List<RatingDistribution> countGroupByGrade();
 
+    // 대시보드 Summary 평균 평점 가져오기
+    @Query("""
+        SELECT COALESCE(AVG(r.grade), 0)
+        FROM Review r
+    """)
+    Double findAverageGrade();
+
 }
