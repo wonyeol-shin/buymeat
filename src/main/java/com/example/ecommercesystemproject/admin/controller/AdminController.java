@@ -8,6 +8,8 @@ import com.example.ecommercesystemproject.common.constant.SessionConst;
 import com.example.ecommercesystemproject.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Parameter;
 import com.example.ecommercesystemproject.common.exception.DifferentPasswordException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -135,6 +137,7 @@ public class AdminController {
         );
     }
 
+    // 승인대기 관리자의 상태를 승인
     @PatchMapping("/{adminId}/approve")
     public ResponseEntity<ApiResponse<Void>> approveAdmin(
             @PathVariable Long adminId,
@@ -174,15 +177,24 @@ public class AdminController {
     @PatchMapping("/profile")
     public ResponseEntity<ApiResponse<Void>> updateMyProfile(
             @Valid @RequestBody UpdateAdminRequest request,
-            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long adminSessionId,
+            HttpServletRequest httpServletRequest
     ) {
 
         // 자기 자신의 프로필 업데이트를 하든지 Admin이 다른 관리자 프로필을 수정하던지 동일한 메서드 사용해오 될듯?
         adminService.updateMyInfo(request, adminSessionId);
+
+        // email(id) 변경 후 세션과 db 정보 불일치를 방지하고자 로그아웃 진행
+
+        HttpSession session = httpServletRequest.getSession(false); // false는 세션이 없으면 새로 만들지 말고 null을 줌
+        if (session != null) {
+            session.invalidate();
+        }
+
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.of(
                         HttpStatus.OK.value(),
-                        "내 프로필 수정 성공"
+                        "내 프로필 수정 성공 (이메일 변경으로 재로그인이 필요합니다.)"
                 )
         );
     }
