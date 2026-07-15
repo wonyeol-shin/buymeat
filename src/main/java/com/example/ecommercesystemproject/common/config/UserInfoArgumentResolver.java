@@ -9,7 +9,6 @@ import com.example.ecommercesystemproject.common.constant.SessionConst;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
@@ -49,6 +48,7 @@ public class UserInfoArgumentResolver implements HandlerMethodArgumentResolver {
         Long sessionAdminId = (Long) session.getAttribute(SessionConst.LOGIN_ADMIN_ID);
         Role sessionAdminRole = (Role) session.getAttribute(SessionConst.LOGIN_ADMIN_ROLE);
         String sessionAdminEmail = (String) session.getAttribute(SessionConst.LOGIN_ADMIN_EMAIL);
+        Status sessionAdminStatus = (Status) session.getAttribute(SessionConst.LOGIN_ADMIN_STATUS);
 
         if (sessionAdminId == null)
             throw new ServiceException("로그인이 필요합니다.", HttpStatus.UNAUTHORIZED);
@@ -56,10 +56,14 @@ public class UserInfoArgumentResolver implements HandlerMethodArgumentResolver {
         if (sessionAdminRole.equals(Role.NONE))
             throw new ServiceException("권한이 없습니다.", HttpStatus.FORBIDDEN);
 
+        if (!sessionAdminStatus.equals(Status.ACTIVE))
+            throw new ServiceException("계정이 비활성화 상태입니다.", HttpStatus.FORBIDDEN);
+
         return new AdminSession(
                 sessionAdminId,
                 sessionAdminRole,
-                sessionAdminEmail
+                sessionAdminEmail,
+                sessionAdminStatus
         );
     }
 }

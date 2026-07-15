@@ -12,4 +12,5 @@ public class AdminSession {
     private final Long id;
     private final Role role;
     private final String email;
+    private final Status status;
 }

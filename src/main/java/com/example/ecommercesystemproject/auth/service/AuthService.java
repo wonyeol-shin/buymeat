@@ -76,6 +76,7 @@ public class AuthService {
         session.setAttribute(SessionConst.LOGIN_ADMIN_ID, admin.getId());
         session.setAttribute(SessionConst.LOGIN_ADMIN_EMAIL, admin.getEmail());
         session.setAttribute(SessionConst.LOGIN_ADMIN_ROLE, admin.getRole());
+        session.setAttribute(SessionConst.LOGIN_ADMIN_STATUS, admin.getStatus());
         // 세션 유효시간 설정
         session.setMaxInactiveInterval(SessionConst.SESSION_TIMEOUT_SECONDS);
 
