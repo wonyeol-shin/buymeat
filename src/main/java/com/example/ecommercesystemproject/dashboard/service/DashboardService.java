@@ -5,6 +5,7 @@ import com.example.ecommercesystemproject.admin.repository.AdminRepository;
 import com.example.ecommercesystemproject.customer.enums.CustomerStatus;
 import com.example.ecommercesystemproject.customer.repository.CustomerRepository;
 import com.example.ecommercesystemproject.dashboard.dto.*;
+import com.example.ecommercesystemproject.dashboard.dto.widget.DashboardWidgetDto;
 import com.example.ecommercesystemproject.order.entity.Order;
 import com.example.ecommercesystemproject.order.entity.OrderStatus;
 import com.example.ecommercesystemproject.order.repository.OrderRepository;
