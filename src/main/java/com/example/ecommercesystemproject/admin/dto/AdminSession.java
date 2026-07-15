@@ -11,5 +11,5 @@ import lombok.RequiredArgsConstructor;
 public class AdminSession {
     private final Long id;
     private final Role role;
-    private final Status status;
+    private final String email;
 }
