@@ -7,6 +7,7 @@ import com.example.ecommercesystemproject.admin.entity.Role;
 import com.example.ecommercesystemproject.admin.entity.Status;
 import com.example.ecommercesystemproject.admin.repository.AdminRepository;
 import com.example.ecommercesystemproject.common.ServiceException;
+import com.example.ecommercesystemproject.common.exception.DuplicateEmailException;
 import jakarta.validation.Valid;
 import com.example.ecommercesystemproject.common.config.PasswordEncoder;
 import com.example.ecommercesystemproject.common.exception.AccountNotActiveException;
@@ -117,6 +118,11 @@ public class AdminService {
         checkActiveAccount(admin.getStatus());
         checkSuperAccount(admin.getRole());
 
+        // 이메일 중복 체크
+        if (adminRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateEmailException("이미 등록된 이메일입니다.");
+        }
+
         // 찾을려는 관리자가 없는 관리자
         Admin findedAdmin = adminRepository.findById(adminId).orElseThrow(
                 () ->  new ServiceException("없는 유저입니다", HttpStatus.BAD_REQUEST)
@@ -209,7 +215,7 @@ public class AdminService {
         // 로그인 한 계정이 활성 상태 계정이 아님
         checkActiveAccount(admin.getStatus());
 
-        if (!admin.getPassword().equals(request.getOldPassword())) {
+        if (!passwordEncoder.matches(request.getOldPassword(), admin.getPassword())) {
             throw new DifferentPasswordException("현재 패스워드와 입력한 패스워드가 일치하지 않습니다.");
         }
 
@@ -229,6 +235,12 @@ public class AdminService {
         // 로그인 한 계정이 활성 상태 계정이 아님
         checkActiveAccount(admin.getStatus());
 
+        // 이메일 중복 체크 ( 이메일은 그대로 두고 업데이트를 시도하면 본인의 이메일과 일치할 경우 넘어감)
+        if (!admin.getEmail().equals(request.getEmail())) {
+            if (adminRepository.existsByEmail(request.getEmail())) {
+                throw new DuplicateEmailException("이미 등록된 이메일입니다.");
+            }
+        }
         admin.updateProfile(request.getName(), request.getEmail(), request.getPhone());
 
     }
