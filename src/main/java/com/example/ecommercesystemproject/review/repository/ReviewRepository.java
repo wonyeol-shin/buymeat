@@ -27,19 +27,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
                 OR c.name LIKE CONCAT('%', :keyword, '%')
                 OR p.productName LIKE CONCAT('%', :keyword, '%')
             )
-            """,
-            countQuery = """
-            SELECT COUNT(r)
-            FROM Review r
-            JOIN r.customer c
-            JOIN r.order o
-            JOIN o.product p
-            WHERE (
-                :keyword IS NULL
-                OR :keyword = ''
-                OR c.name LIKE CONCAT('%', :keyword, '%')
-                OR p.productName LIKE CONCAT('%', :keyword, '%')
-            )
             """
     )
     Page<Review> findAllWithCustomerAndOrder(@NonNull Pageable pageable, String keyword);

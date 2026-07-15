@@ -13,10 +13,20 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("""
-    SELECT o FROM Order o WHERE
-    (:keyword IS NULL OR o.orderNumber LIKE CONCAT('%', :keyword, '%')
-    OR o.customer.name LIKE CONCAT('%', :keyword, '%')) AND (:status IS NULL
-    OR o.status = :status)""")
+        SELECT
+            o
+        FROM Order o
+        JOIN FETCH o.customer c
+        JOIN FETCH o.product p
+        JOIN FETCH o.admin a
+        WHERE (
+            :keyword IS NULL OR o.orderNumber LIKE CONCAT('%', :keyword, '%')
+            OR o.customer.name LIKE CONCAT('%', :keyword, '%')
+        ) AND (
+            :status IS NULL
+            OR o.status = :status
+        )
+    """)
     Page<Order> findByKeywordAndStatus(
             @Param("keyword") String keyword,
             @Param("status")OrderStatus status,
