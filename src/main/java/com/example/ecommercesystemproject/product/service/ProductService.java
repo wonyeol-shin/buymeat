@@ -71,7 +71,6 @@ public class ProductService {
                 );
 
         List<ListReviewResponse> gradeTop3 = reviewList.stream()
-                .sorted(( (r1, r2) -> Double.compare(r2.getGrade(), r1.getGrade()) ))
                 .limit(3)
                 .toList();
 
