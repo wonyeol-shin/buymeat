@@ -45,7 +45,4 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // 상태별 상품 개수
     Long countByStatus(ProductStatus status);
 
-    // 재고 부족 상품 수: 재고 5개 이하
-    @Query("SELECT COUNT(p) FROM Product p WHERE p.stock <= 5 ")
-    Long countShortOfCount();
 }

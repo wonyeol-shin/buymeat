@@ -37,7 +37,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("""
         SELECT SUM(o.totalPrice)  FROM Order o\s
-        WHERE ( o.modifiedAt > :datetime ) \s
+        WHERE ( o.createdAt > :datetime ) AND (o.status != OrderStatus.CANCELED) \s
 """)
     Long sumTotalPriceToday(LocalDateTime datetime);
 }

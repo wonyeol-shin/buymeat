@@ -56,7 +56,7 @@ public class DashboardService {
                 Long deliveredCount = orderRepository.countByStatus(OrderStatus.DELIVERED);
 
                 // 재고 부족 상품 수: 재고 5개 이하
-                Long shortOfCount = productRepository.countShortOfCount();
+                Long shortOfCount = productRepository.countByStockLessThanEqual(5);
 
                 // 재고 없음(품절) 상품 수
                 Long soldOutCount = productRepository.countByStatus(ProductStatus.SOLD_OUT);
