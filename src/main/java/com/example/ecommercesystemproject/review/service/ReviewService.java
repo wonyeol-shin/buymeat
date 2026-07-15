@@ -5,6 +5,7 @@ import com.example.ecommercesystemproject.review.dto.ListReviewResponse;
 import com.example.ecommercesystemproject.review.entity.Review;
 import com.example.ecommercesystemproject.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,14 +20,12 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
 
-    public List<ListReviewResponse> getAllReview(Pageable pageable, String keyword) {
+    public Page<ListReviewResponse> getAllReview(Pageable pageable, String keyword) {
         return reviewRepository.findAllWithCustomerAndOrder(
                         pageable,
                         keyword == null ? null : keyword.trim()
                 )
-                .stream()
-                .map(ListReviewResponse::from)
-                .toList();
+                .map(ListReviewResponse::from);
     }
 
     public ListReviewResponse getOneReview(Long reviewId) {

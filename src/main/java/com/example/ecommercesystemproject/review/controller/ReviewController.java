@@ -4,6 +4,7 @@ import com.example.ecommercesystemproject.common.response.ApiResponse;
 import com.example.ecommercesystemproject.review.dto.ListReviewResponse;
 import com.example.ecommercesystemproject.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -26,15 +27,16 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ListReviewResponse>>> getAll(
+    public ResponseEntity<ApiResponse<Page<ListReviewResponse>>> getAll(
             @PageableDefault(
+                    page = 0,
                     size = 10,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC
             ) Pageable pageable,
             @RequestParam(required = false) String searchKeyword
     ) {
-        List<ListReviewResponse> responses = reviewService.getAllReview(pageable, searchKeyword);
+        Page<ListReviewResponse> responses = reviewService.getAllReview(pageable, searchKeyword);
         return ResponseEntity.ok(
                 ApiResponse.of(
                         HttpStatus.OK.value(),

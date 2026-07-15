@@ -15,26 +15,30 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query(
             value = """
-                SELECT r FROM Review r
-                JOIN FETCH r.customer c
-                JOIN FETCH r.order o
-                WHERE (
-                    :keyword IS NULL OR
-                    :keyword = '' OR
-                    r.content LIKE %:keyword% OR
-                    c.name LIKE %:keyword%
-                )
-                """,
+            SELECT r
+            FROM Review r
+            JOIN FETCH r.customer c
+            JOIN FETCH r.order o
+            JOIN FETCH o.product p
+            WHERE (
+                :keyword IS NULL
+                OR :keyword = ''
+                OR c.name LIKE CONCAT('%', :keyword, '%')
+                OR p.productName LIKE CONCAT('%', :keyword, '%')
+            )
+            """,
             countQuery = """
-                SELECT COUNT(r) FROM Review r
-                JOIN r.customer c
-                JOIN r.order o
-                WHERE (
-                    :keyword IS NULL OR
-                    :keyword = '' OR
-                    r.content LIKE %:keyword% OR
-                    c.name LIKE %:keyword%
-                )
+            SELECT COUNT(r)
+            FROM Review r
+            JOIN r.customer c
+            JOIN r.order o
+            JOIN o.product p
+            WHERE (
+                :keyword IS NULL
+                OR :keyword = ''
+                OR c.name LIKE CONCAT('%', :keyword, '%')
+                OR p.productName LIKE CONCAT('%', :keyword, '%')
+            )
             """
     )
     Page<Review> findAllWithCustomerAndOrder(@NonNull Pageable pageable, String keyword);
