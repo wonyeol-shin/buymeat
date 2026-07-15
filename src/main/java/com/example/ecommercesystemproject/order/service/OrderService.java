@@ -33,6 +33,7 @@ public class OrderService {
     @Transactional
     public OrderResponse create(CreateOrderRequest request, Long adminId) {
         Product product = getProductOrThrow(request);
+        product.decreaseStock(request.getQuantity());
         Customer customer = getCustomerOrThrow(request);
         Admin admin = getAdminOrThrow(adminId);
 
