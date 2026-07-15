@@ -34,6 +34,7 @@ public class ListReviewResponse {
                 .customerEmail(review.getCustomer().getEmail())
                 .customerName(review.getCustomer().getName())
                 .orderNumber(review.getOrder().getOrderNumber())
+                .productName(review.getProduct().getProductName())
                 .build();
     }
 
