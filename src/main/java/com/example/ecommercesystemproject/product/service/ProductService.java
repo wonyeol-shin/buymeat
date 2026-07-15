@@ -6,6 +6,8 @@ import com.example.ecommercesystemproject.common.ServiceException;
 import com.example.ecommercesystemproject.product.dto.*;
 import com.example.ecommercesystemproject.product.entity.Product;
 import com.example.ecommercesystemproject.product.repository.ProductRepository;
+import com.example.ecommercesystemproject.review.dto.ListReviewResponse;
+import com.example.ecommercesystemproject.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,12 +16,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
     private final AdminRepository adminRepository;
+    private final ReviewService reviewService;
 
     // 상품 등록
     @Transactional
@@ -49,7 +54,32 @@ public class ProductService {
         checkLogin(adminId);
         Product product = checkKey(id);
 
-        return GetProductResponse.from(product);
+        List<ListReviewResponse> reviewList = reviewService.getAllReviewByProduct(id);
+        Integer reviewCnt = reviewList.size();
+        Double average = reviewList.stream()
+                .mapToDouble(ListReviewResponse::getGrade)
+                .average()
+                .orElse(0.0);
+
+        Map<Integer, Integer> gradeCntStats = reviewList.stream()
+                .map(ListReviewResponse::getGrade)
+                .collect(
+                        Collectors.groupingBy(
+                                grade -> grade,
+                                Collectors.reducing(0, e -> 1, Integer::sum)
+                        )
+                );
+
+        List<ListReviewResponse> gradeTop3 = reviewList.stream()
+                .sorted(( (r1, r2) -> Double.compare(r2.getGrade(), r1.getGrade()) ))
+                .limit(3)
+                .toList();
+
+        GetProductResponse getProductResponse = GetProductResponse.from(product);
+        ProductDetailReview productDetailReview = new ProductDetailReview(reviewCnt, average, gradeCntStats, gradeTop3);
+        getProductResponse.setReview(productDetailReview);
+
+        return getProductResponse;
     }
 
     // 상품 업데이트

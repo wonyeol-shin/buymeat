@@ -18,17 +18,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
 
-    @PostMapping("/api/products")
-    public ResponseEntity<ApiResponse<CreateProductResponse>> create
-            (@Valid @RequestBody CreateProductRequest request,
-             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
-            ) {
-
-     
+    @PostMapping
+    public ResponseEntity<ApiResponse<CreateProductResponse>> create(
+            @Valid @RequestBody CreateProductRequest request,
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+    ) {
         CreateProductResponse response = productService.createProduct(request, sessionAdminId);
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse.of(
@@ -38,23 +37,27 @@ public class ProductController {
         ); // 201
     }
 
-    // 전체 조회 + 페이징, 검색 기능
-    @GetMapping("/api/products")
-    public ResponseEntity<Page<GetProductsResponse>> getAll
-            (@Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) Long sessionAdminId,
-             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-             ProductSearchCondition condition
-            ) {
-
-        return ResponseEntity.ok(productService.getAllProducts(sessionAdminId, pageable, condition)); // 200
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<GetProductsResponse>>> getAll(
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId,
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            ProductSearchCondition condition
+    ) {
+        Page<GetProductsResponse> responses = productService.getAllProducts(sessionAdminId, pageable, condition);
+        return ResponseEntity.ok(
+                ApiResponse.of(
+                        HttpStatus.OK.value(),
+                        "상품 목록 조회 성공",
+                        responses
+                )
+        ); // 200
     }
 
-    @GetMapping("/api/products/{productId}")
-    public ResponseEntity<ApiResponse<GetProductResponse>> getOne
-            (@PathVariable Long productId,
-             @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID, required = false) Long sessionAdminId) {
-
-       
+    @GetMapping("/{productId}")
+    public ResponseEntity<ApiResponse<GetProductResponse>> getOne(
+            @PathVariable Long productId,
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+    ) {
         GetProductResponse response = productService.getOneProduct(productId, sessionAdminId);
 
         return ResponseEntity.ok(
@@ -66,13 +69,12 @@ public class ProductController {
         );
     }
 
-    @PutMapping("/api/products/{productId}")
-    public ResponseEntity<ApiResponse<UpdateProductResponse>> update
-            (@PathVariable Long productId, @Valid @RequestBody UpdateProductRequest request,
-             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
-            ) {
-
-     
+    @PutMapping("/{productId}")
+    public ResponseEntity<ApiResponse<UpdateProductResponse>> update(
+            @PathVariable Long productId,
+            @Valid @RequestBody UpdateProductRequest request,
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+    ) {
         UpdateProductResponse response = productService.updateProduct(productId, request, sessionAdminId);
 
         return ResponseEntity.ok(
@@ -84,13 +86,12 @@ public class ProductController {
         );
     }
 
-    @PatchMapping("/api/products/{productId}/stock")
-    public ResponseEntity<ApiResponse<UpdateProductStockResponse>> updateStock
-            (@PathVariable Long productId, @Valid @RequestBody UpdateProductStockRequest request,
-             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
-            ) {
-
-        
+    @PatchMapping("/{productId}/stock")
+    public ResponseEntity<ApiResponse<UpdateProductStockResponse>> updateStock(
+            @PathVariable Long productId,
+            @Valid @RequestBody UpdateProductStockRequest request,
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+    ) {
         UpdateProductStockResponse response = productService.updateProductStock(productId, request, sessionAdminId);
 
         return ResponseEntity.ok(
@@ -102,13 +103,11 @@ public class ProductController {
         );
     }
 
-    @PatchMapping("/api/products/{productId}/status")
-    public ResponseEntity<ApiResponse<UpdateProductStatusResponse>> updateStatus
-            (@PathVariable Long productId, @Valid @RequestBody UpdateProductStatusRequest request,
-             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
-            ) {
-
-       
+    @PatchMapping("/{productId}/status")
+    public ResponseEntity<ApiResponse<UpdateProductStatusResponse>> updateStatus(
+            @PathVariable Long productId, @Valid @RequestBody UpdateProductStatusRequest request,
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+    ) {
         UpdateProductStatusResponse response = productService.updateProductStatus(productId, request, sessionAdminId);
 
         return ResponseEntity.ok(
@@ -120,12 +119,11 @@ public class ProductController {
         );
     }
 
-    @DeleteMapping("/api/products/{productId}")
-    public ResponseEntity<Void> delete
-            (@PathVariable Long productId,
-             @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
-            ) {
-
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Void> delete(
+            @PathVariable Long productId,
+            @Parameter(hidden = true) @SessionAttribute(name = SessionConst.LOGIN_ADMIN_ID) Long sessionAdminId
+    ) {
         productService.deleteProduct(productId, sessionAdminId);
         return ResponseEntity.noContent().build(); // 204
     }

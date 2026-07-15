@@ -41,4 +41,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT new com.example.ecommercesystemproject.dashboard.dto.CategoryDistribution(p.category, COUNT(p)) " +
             "FROM Product p GROUP BY p.category")
     List<CategoryDistribution> countGroupByCategory();
+
+    // 상태별 상품 개수
+    Long countByStatus(ProductStatus status);
+
+    // 대시보드 Summary 5개 이하 재고 가져오기
+    long countByStockLessThanEqual(Integer stock);
 }
