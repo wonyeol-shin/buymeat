@@ -1,10 +1,10 @@
 package com.example.ecommercesystemproject.order.controller;
 
-import com.example.ecommercesystemproject.common.constant.SessionConst;
+import com.example.ecommercesystemproject.admin.dto.AdminSession;
+import com.example.ecommercesystemproject.common.annotation.UserInfo;
 import com.example.ecommercesystemproject.common.response.ApiResponse;
 import com.example.ecommercesystemproject.order.dto.*;
 import com.example.ecommercesystemproject.order.service.OrderService;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,10 +24,10 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<ApiResponse<OrderResponse>> create(
             @Valid @RequestBody CreateOrderRequest request,
-            HttpSession session
+            @UserInfo AdminSession adminSession
     ) {
-        Long adminId = (Long) session.getAttribute(SessionConst.LOGIN_ADMIN_ID);
-        OrderResponse response = orderService.create(request, adminId);
+
+        OrderResponse response = orderService.create(request, adminSession.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse.of(
                         HttpStatus.CREATED.value(),
@@ -78,11 +78,10 @@ public class OrderController {
     public ResponseEntity<ApiResponse<OrderResponse>> updateStatus(
             @PathVariable Long orderId,
             @Valid @RequestBody UpdateOrderRequest request,
-            HttpSession session
+            @UserInfo AdminSession adminSession
     ) {
-        Long adminId = (Long) session.getAttribute(SessionConst.LOGIN_ADMIN_ID);
 
-        OrderResponse response = orderService.updateOrderStatus(orderId, request, adminId);
+        OrderResponse response = orderService.updateOrderStatus(orderId, request, adminSession.getId());
 
         return ResponseEntity.ok(
                 ApiResponse.of(
@@ -97,11 +96,10 @@ public class OrderController {
     public ResponseEntity<ApiResponse<OrderResponse>> cancel(
             @PathVariable Long orderId,
             @Valid @RequestBody CancelOrderRequest request,
-            HttpSession session
+            @UserInfo AdminSession adminSession
     ) {
-        Long adminId = (Long) session.getAttribute(SessionConst.LOGIN_ADMIN_ID);
 
-        OrderResponse response = orderService.cancelOrder(orderId, request, adminId);
+        OrderResponse response = orderService.cancelOrder(orderId, request, adminSession.getId());
 
         return ResponseEntity.ok(
                 ApiResponse.of(
