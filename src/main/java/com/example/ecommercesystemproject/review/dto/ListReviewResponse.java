@@ -24,8 +24,7 @@ public class ListReviewResponse {
 
     private String orderNumber;
 
-//    TODO: product domain 추가되면 주석 풀기
-//    private String productName;
+    private String productName;
 
     public static ListReviewResponse from(Review review) {
         return ListReviewResponse.builder()

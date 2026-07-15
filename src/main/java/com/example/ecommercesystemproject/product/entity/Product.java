@@ -11,8 +11,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Table(name = "products")
 @NoArgsConstructor
-public class Product {
+public class Product extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
