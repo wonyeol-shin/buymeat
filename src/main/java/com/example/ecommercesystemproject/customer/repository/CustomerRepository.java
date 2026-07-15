@@ -14,6 +14,7 @@ import java.util.List;
 
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
+    // 페이징 검색, 전체조회
     @Query("""
             SELECT c
             FROM Customer c
@@ -26,4 +27,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     @Query("SELECT new com.example.ecommercesystemproject.dashboard.dto.CustomerStatusDistribution(c.status, COUNT(c)) " +
             "FROM Customer c GROUP BY c.status")
     List<CustomerStatusDistribution> countGroupByStatus();
+
+    // 대시보드 - summary - 활성화 고객 수 가져오기
+    long countByStatus(CustomerStatus status);
 }

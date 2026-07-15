@@ -34,10 +34,16 @@ public class GlobalExceptionHandler {
 
     // 서비스 에러 로직처리 관련 처리
     @ExceptionHandler(ServiceException.class)
-    public ResponseEntity<String> serviceException(
+    public ResponseEntity<ApiResponse<String>> serviceException(
             ServiceException ex
     ) {
-        return ResponseEntity.status(ex.getStatus()).body(ex.getMessage());
+        return ResponseEntity.status(ex.getStatus())
+                .body(
+                        ApiResponse.of(
+                                ex.getStatus().value(),
+                                ex.getMessage()
+                        )
+                );
     }
 
     // 서버 에러 관련 처리

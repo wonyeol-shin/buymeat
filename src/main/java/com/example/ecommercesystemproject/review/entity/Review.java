@@ -3,6 +3,7 @@ package com.example.ecommercesystemproject.review.entity;
 import com.example.ecommercesystemproject.common.BaseEntity;
 import com.example.ecommercesystemproject.customer.entity.Customer;
 import com.example.ecommercesystemproject.order.entity.Order;
+import com.example.ecommercesystemproject.product.entity.Product;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,6 +16,8 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @AllArgsConstructor
@@ -41,9 +44,9 @@ public class Review extends BaseEntity {
     private Customer customer;
 
 //    TODO: Product Entity 추가되면 그때 풀기
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "product_id")
-//    private Product product;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
 
 
 }

@@ -21,4 +21,7 @@ public interface AdminRepository extends JpaRepository<Admin, Long>, JpaSpecific
 
     Optional<Admin> findByEmail(String email);
 
+    // 대시보드 Summary 활성화된 관리자 수 가져오기
+    long countByStatus(Status status);
+
 }

@@ -39,5 +39,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         SELECT SUM(o.totalPrice)  FROM Order o\s
         WHERE ( o.createdAt > :datetime ) AND (o.status != OrderStatus.CANCELED) \s
 """)
+           
     Long sumTotalPriceToday(LocalDateTime datetime);
+           
+    // 대시보드 Summary 오늘 주문수량 가져오기
+    long countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(
+            LocalDateTime start, LocalDateTime end);
 }
