@@ -7,6 +7,7 @@ import com.example.ecommercesystemproject.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,16 @@ public class ReviewService {
                 .orElseThrow(() -> new ServiceException("Review not found", HttpStatus.NOT_FOUND));
 
         reviewRepository.delete(review);
+    }
+
+    /**
+     * 통계용으로 쓰는 메서드. paging 처리 고의로 X
+     */
+    public List<ListReviewResponse> getAllReviewByProduct(Long productId) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        return reviewRepository.findAllByProduct_Id(productId, sort).stream()
+                .map(ListReviewResponse::from)
+                .toList();
     }
 
 }

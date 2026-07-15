@@ -41,6 +41,7 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
+//    TODO: Product Entity 추가되면 그때 풀기
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
