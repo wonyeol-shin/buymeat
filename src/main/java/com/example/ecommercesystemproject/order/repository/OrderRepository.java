@@ -9,13 +9,24 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("""
-    SELECT o FROM Order o WHERE
-    (:keyword IS NULL OR o.orderNumber LIKE CONCAT('%', :keyword, '%')
-    OR o.customer.name LIKE CONCAT('%', :keyword, '%')) AND (:status IS NULL
-    OR o.status = :status)""")
+        SELECT
+            o
+        FROM Order o
+        JOIN FETCH o.customer c
+        JOIN FETCH o.product p
+        JOIN FETCH o.admin a
+        WHERE (
+            :keyword IS NULL OR o.orderNumber LIKE CONCAT('%', :keyword, '%')
+            OR o.customer.name LIKE CONCAT('%', :keyword, '%')
+        ) AND (
+            :status IS NULL
+            OR o.status = :status
+        )
+    """)
     Page<Order> findByKeywordAndStatus(
             @Param("keyword") String keyword,
             @Param("status")OrderStatus status,
@@ -51,4 +62,18 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // 대시보드 Summary 오늘 주문수량 가져오기
     long countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(
             LocalDateTime start, LocalDateTime end);
+
+    // grouping by customer
+    @Query("""
+        SELECT
+            o.customer.id customerId,
+            COUNT(o) orderCount,
+            COALESCE(SUM(o.totalPrice), 0) totalPrice
+        FROM Order o
+        WHERE o.customer.id IN :customerIds
+        GROUP BY o.customer.id
+    """)
+    List<CustomerOrderStats> findOrderStatsGroupByCustomerIds(
+            @Param("customerIds") List<Long> customerIds
+    );
 }
