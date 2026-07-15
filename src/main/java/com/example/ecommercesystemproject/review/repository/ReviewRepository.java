@@ -52,6 +52,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     List<Review> findAllByProduct_Id(Long productId, Sort sort);
     // dashboard(charts) dto - RatingDistribution
+    // ex) RatingDistribution(grade=5, count=3)
+    //     RatingDistribution(grade=4, count=1)
+    //     RatingDistribution(grade=3, count=1)
     @Query("SELECT new com.example.ecommercesystemproject.dashboard.dto.RatingDistribution(r.grade, COUNT(r)) " +
             "FROM Review r GROUP BY r.grade")
     List<RatingDistribution> countGroupByGrade();
