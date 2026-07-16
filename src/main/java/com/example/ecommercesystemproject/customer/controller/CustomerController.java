@@ -1,5 +1,7 @@
 package com.example.ecommercesystemproject.customer.controller;
 
+import com.example.ecommercesystemproject.admin.dto.AdminSession;
+import com.example.ecommercesystemproject.common.annotation.UserInfo;
 import com.example.ecommercesystemproject.common.response.ApiResponse;
 import com.example.ecommercesystemproject.customer.dto.*;
 import com.example.ecommercesystemproject.customer.service.CustomerService;
@@ -23,9 +25,10 @@ public class CustomerController {
     // 고객 생성
     @PostMapping
     public ResponseEntity<ApiResponse<CreateCustomerResponse>> createCustomer(
-            @Valid @RequestBody CreateCustomerRequest request
+            @Valid @RequestBody CreateCustomerRequest request,
+            @UserInfo AdminSession adminSession
     ) {
-        CreateCustomerResponse response = customerService.createCustomer(request);
+        CreateCustomerResponse response = customerService.createCustomer(request,adminSession.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ApiResponse.of(
                         HttpStatus.CREATED.value(),
@@ -39,9 +42,10 @@ public class CustomerController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<GetCustomerResponse>>> getAll(
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            CustomerSearchCondition condition
+            CustomerSearchCondition condition,
+            @UserInfo AdminSession adminSession
     ) {
-        Page<GetCustomerResponse> responses = customerService.getAllCustomer(pageable, condition);
+        Page<GetCustomerResponse> responses = customerService.getAllCustomer(pageable, condition, adminSession.getId());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.of(
                         HttpStatus.OK.value(),
@@ -54,9 +58,10 @@ public class CustomerController {
     // 고객 단건 조회
     @GetMapping("/{customerId}")
     public ResponseEntity<ApiResponse<GetCustomerResponse>> getOne(
-            @PathVariable Long customerId
+            @PathVariable Long customerId,
+            @UserInfo AdminSession adminSession
     ) {
-        GetCustomerResponse response = customerService.getOneCustomer(customerId);
+        GetCustomerResponse response = customerService.getOneCustomer(customerId, adminSession.getId());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.of(
                         HttpStatus.OK.value(),
@@ -70,9 +75,10 @@ public class CustomerController {
     @PutMapping("/{customerId}")
     public ResponseEntity<ApiResponse<UpdateCustomerResponse>> updateCustomer(
             @PathVariable Long customerId,
-            @RequestBody UpdateCustomerRequest request
+            @RequestBody UpdateCustomerRequest request,
+            @UserInfo AdminSession adminSession
     ) {
-        UpdateCustomerResponse response = customerService.updateCustomer(customerId, request);
+        UpdateCustomerResponse response = customerService.updateCustomer(customerId, request, adminSession.getId());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.of(
                         HttpStatus.OK.value(),
@@ -86,9 +92,10 @@ public class CustomerController {
     @PatchMapping("/{customerId}/status")
     public ResponseEntity<ApiResponse<UpdateCustomerStatusResponse>> updateCustomerStatus(
             @PathVariable Long customerId,
-            @Valid @RequestBody UpdateCustomerStatusRequest request
+            @Valid @RequestBody UpdateCustomerStatusRequest request,
+            @UserInfo AdminSession adminSession
     ) {
-        UpdateCustomerStatusResponse response = customerService.updateCustomerStatus(customerId, request);
+        UpdateCustomerStatusResponse response = customerService.updateCustomerStatus(customerId, request, adminSession.getId());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.of(
                         HttpStatus.OK.value(),
@@ -101,9 +108,10 @@ public class CustomerController {
     // 고객 삭제
     @DeleteMapping("/{customerId}")
     public ResponseEntity<Void> deleteCustomer(
-            @PathVariable Long customerId
+            @PathVariable Long customerId,
+            @UserInfo AdminSession adminSession
     ) {
-        customerService.deleteCustomer(customerId);
+        customerService.deleteCustomer(customerId, adminSession.getId());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

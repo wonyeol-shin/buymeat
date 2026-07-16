@@ -62,6 +62,7 @@ public class AdminService {
         Admin admin = findAdminExist(sessionAdminId);
 
         checkActiveAccount(admin.getStatus());
+        checkSuperAccount(admin.getRole());
 
         Specification<Admin> adminSpecification = Specification.where(
                         AdminSpecification.equalName(condition.getName()))
@@ -90,6 +91,7 @@ public class AdminService {
 
         // 로그인 한 계정이 활성 상태 계정이 아닐경우  조회 할 권한이 없음
         checkActiveAccount(admin.getStatus());
+        checkSuperAccount(admin.getRole());
 
         // 찾을려는 관리자가 없는 관리자
         Admin findedAdmin = adminRepository.findById(adminId).orElseThrow(
