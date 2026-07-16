@@ -1,6 +1,13 @@
 package com.example.ecommercesystemproject.customer.service;
 
+import com.example.ecommercesystemproject.admin.entity.Admin;
+import com.example.ecommercesystemproject.admin.entity.Role;
+import com.example.ecommercesystemproject.admin.entity.Status;
+import com.example.ecommercesystemproject.admin.repository.AdminRepository;
 import com.example.ecommercesystemproject.common.ServiceException;
+import com.example.ecommercesystemproject.common.exception.AccountNotActiveException;
+import com.example.ecommercesystemproject.common.exception.ForbiddenException;
+import com.example.ecommercesystemproject.common.exception.IsNotSuperAccountException;
 import com.example.ecommercesystemproject.customer.dto.*;
 import com.example.ecommercesystemproject.customer.entity.Customer;
 import com.example.ecommercesystemproject.customer.enums.CustomerStatus;
@@ -25,10 +32,33 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final OrderRepository orderRepository;
+    private final AdminRepository adminRepository;
+
+    private Admin findAdminExist(Long sessionAdminId) {
+        return adminRepository.findById(sessionAdminId).orElseThrow(
+                () -> new IllegalStateException("로그인 정보가 유효하지 않음")
+        );
+    }
+
+    private void checkActiveAccount(Status status) {
+        if (status != Status.ACTIVE) {
+            throw new AccountNotActiveException("계정이 활성상태가 아닙니다. 관리자에게 문의하세요");
+        }
+    }
+
+    private void checkSuperAccount(Role role) {
+        if (role != Role.SUPER) {
+            throw new IsNotSuperAccountException("Super 계정만 가능한 작업입니다.");
+        }
+    }
+
 
     // 고객 생성
     @Transactional
-    public CreateCustomerResponse createCustomer(CreateCustomerRequest request) {
+    public CreateCustomerResponse createCustomer(CreateCustomerRequest request, Long adminId) {
+        Admin admin = findAdminExist(adminId);
+        checkActiveAccount(admin.getStatus());
+
         Customer customer = new Customer(request.getName(), request.getEmail(), request.getPhone());
         Customer savedCustomer = customerRepository.save(customer);
         return new CreateCustomerResponse(
@@ -40,7 +70,11 @@ public class CustomerService {
 
     // 고객 전체 조회 + 각 고객 주문수량, 총주문금액
     @Transactional(readOnly = true)
-    public Page<GetCustomerResponse> getAllCustomer(Pageable pageable, CustomerSearchCondition condition) {
+    public Page<GetCustomerResponse> getAllCustomer(Pageable pageable, CustomerSearchCondition condition, Long adminId) {
+
+        Admin admin = findAdminExist(adminId);
+        checkActiveAccount(admin.getStatus());
+
         Page<Customer> customers = customerRepository.searchByKeywordAndStatus(condition.getKeyword(), condition.getStatus(), pageable);
 
         // customer ID list
@@ -69,7 +103,10 @@ public class CustomerService {
 
     // 고객 단건 조회 + 해당 고객 주문수량, 총 주문금액
     @Transactional(readOnly = true)
-    public GetCustomerResponse getOneCustomer(Long customerId) {
+    public GetCustomerResponse getOneCustomer(Long customerId, Long adminId) {
+        Admin admin = findAdminExist(adminId);
+        checkActiveAccount(admin.getStatus());
+
         Customer customer = getOrThrow(customerId);
         Long orderCount = orderRepository.countByCustomerId(customerId);
         Long totalPrice = orderRepository.sumTotalPriceByCustomerId(customerId);
@@ -82,7 +119,10 @@ public class CustomerService {
 
     // 고객 정보 수정
     @Transactional
-    public UpdateCustomerResponse updateCustomer(Long customerId, UpdateCustomerRequest request) {
+    public UpdateCustomerResponse updateCustomer(Long customerId, UpdateCustomerRequest request, Long adminId) {
+        Admin admin = findAdminExist(adminId);
+        checkActiveAccount(admin.getStatus());
+
         Customer customer = getOrThrow(customerId);
         customer.updateCustomer(request.getName(), request.getEmail(), request.getPhone());
         return new UpdateCustomerResponse(
@@ -93,7 +133,10 @@ public class CustomerService {
 
     // 고객 상태 수정
     @Transactional
-    public UpdateCustomerStatusResponse updateCustomerStatus(Long customerId, UpdateCustomerStatusRequest request) {
+    public UpdateCustomerStatusResponse updateCustomerStatus(Long customerId, UpdateCustomerStatusRequest request, Long adminId) {
+        Admin admin = findAdminExist(adminId);
+        checkActiveAccount(admin.getStatus());
+
         Customer customer = getOrThrow(customerId);
         customer.updateCustomerStatus(request.getStatus());
         return new UpdateCustomerStatusResponse(customer.getId(), customer.getStatus());
@@ -101,7 +144,11 @@ public class CustomerService {
 
     // 고객 삭제(회원탈퇴) - 비활성으로 상태 변경
     @Transactional
-    public void deleteCustomer(Long customerId) {
+    public void deleteCustomer(Long customerId, Long adminId) {
+        Admin admin = findAdminExist(adminId);
+        checkActiveAccount(admin.getStatus());
+        checkSuperAccount(admin.getRole());
+
         Customer customer = getOrThrow(customerId);
         customer.inactiveCustomerStatus();
     }
