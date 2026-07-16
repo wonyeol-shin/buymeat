@@ -5,6 +5,15 @@
 관리자 계정을 통해 상품, 고객, 주문, 리뷰를 효율적으로 관리하고,
 대시보드를 통해 서비스 현황을 한눈에 확인할 수 있는 **관리자 전용 백오피스 시스템**입니다.
 
+![Static Badge](https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white)
+![Static Badge](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
+![Static Badge](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=white)
+
+![Static Badge](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+
+![Static Badge](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
+![Slack](https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=slack&logoColor=white)
+
 ---
 
 ## 📅 프로젝트 기간
@@ -373,6 +382,121 @@ http://localhost:8080/swagger-ui/index.html
 - Validation 및 Exception 테스트
 
 ---
+
+# 내부 구조
+## 다이어그램
+
+### ERD
+
+```mermaid
+erDiagram
+    ADMINS {
+        Long id PK
+        String name
+        String email UK
+        String password
+        String phone UK
+        String role "SUPER | OP | CS | NONE"
+        String status "ACTIVE | STANDBY | INACTIVE | SUSPENSION | REJECT"
+        String whyAdminReason
+        String rejectReason
+        LocalDateTime approvedAt
+        LocalDateTime rejectedAt
+        LocalDateTime createdAt
+        LocalDateTime modifiedAt
+    }
+
+    CUSTOMERS {
+        Long id PK
+        String name
+        String email UK
+        String phone
+        String status "ACTIVE | INACTIVE | SUSPENSION"
+        LocalDateTime createdAt
+        LocalDateTime modifiedAt
+    }
+
+    PRODUCT {
+        Long id PK
+        String productName
+        String category
+        Long price
+        Integer stock
+        String status "ACTIVE | ON_SALE | SOLD_OUT | DISCONTINUED"
+        Long admin_id FK
+        LocalDateTime createdAt
+    }
+
+    ORDERS {
+        Long id PK
+        String orderNumber UK
+        Integer quantity
+        Long totalPrice
+        String status "PREPARING | SHIPPING | DELIVERED | CANCELED"
+        String cancellationReason
+        Long admin_id FK
+        Long product_id FK
+        Long customer_id FK
+        LocalDateTime createdAt
+        LocalDateTime modifiedAt
+    }
+
+    REVIEW {
+        Long id PK
+        Integer grade "별점 (1~5)"
+        String content
+        Long order_id FK
+        Long customer_id FK
+        Long product_id FK
+        LocalDateTime createdAt
+        LocalDateTime modifiedAt
+    }
+
+    ADMINS ||--o{ PRODUCT : "등록"
+    ADMINS ||--o{ ORDERS : "처리"
+    CUSTOMERS ||--o{ ORDERS : "주문"
+    PRODUCT ||--o{ ORDERS : "포함"
+    CUSTOMERS ||--o{ REVIEW : "작성"
+    ORDERS ||--o{ REVIEW : "기반"
+    PRODUCT ||--o{ REVIEW : "대상"
+```
+
+### 세션 기반 인증 흐름
+
+```mermaid
+sequenceDiagram
+    participant C as 클라이언트
+    participant S as 서버
+    participant DB as DB
+
+    C->>S: POST /login (email, password)
+    S->>DB: 이메일로 Admin 조회
+    DB-->>S: Admin 객체 반환
+    S->>S: BCrypt로 비밀번호 비교
+    S->>S: 계정 상태 확인 (ACTIVE만 통과)
+    S->>S: HttpSession 생성 & adminId 저장
+    S-->>C: 200 OK + Set-Cookie: JSESSIONID=xxx
+
+    C->>S: GET /api/products (Cookie: JSESSIONID=xxx)
+    S->>S: LoginCheckInterceptor 실행
+    S->>S: 세션에서 adminId 꺼냄
+    S-->>C: 200 OK + 상품 목록
+```
+
+### 도메인 간 의존 관계
+
+```mermaid
+graph TD
+    Auth -->|Admin 조회| Admin
+    Product -->|등록자 조회| Admin
+    Order -->|처리자 조회| Admin
+    Order -->|상품 조회| Product
+    Order -->|고객 조회| Customer
+    Review -->|주문 참조| Order
+    Review -->|고객 참조| Customer
+    Review -->|상품 참조| Product
+    Product -->|리뷰 통계 조회| Review
+```
 
 ## 🚀 실행 방법
 
